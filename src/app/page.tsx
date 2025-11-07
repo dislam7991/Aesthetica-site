@@ -227,108 +227,112 @@ export default function AestheticaFitnessCoaching() {
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(800px_400px_at_20%_-10%,rgba(59,130,246,.35),transparent),radial-gradient(600px_300px_at_80%_-10%,rgba(16,185,129,.25),transparent)]" />
 
       {/* HEADER */}
-      <header className="sticky top-0 z-50 border-b border-white/5 backdrop-blur supports-[backdrop-filter]:bg-slate-950/70">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="grid h-9 w-9 place-items-center rounded-2xl bg-gradient-to-br from-blue-500 to-teal-400 text-slate-950 shadow">
-              <Dumbbell className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs tracking-widest text-blue-300">AESTHETICA</p>
-              <p className="-mt-0.5 text-sm font-semibold">Fitness Coaching</p>
-            </div>
-          </div>
+<header className="sticky top-0 z-50 border-b border-white/5 backdrop-blur supports-[backdrop-filter]:bg-slate-950/70">
+  <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2 sm:px-4 sm:py-3">
+    <div className="flex items-center gap-2 sm:gap-3">
+      <Image
+        src="/logo.png"
+        alt="Aesthetica Logo"
+        width={32}
+        height={32}
+        className="rounded-lg sm:w-9 sm:h-9"
+      />
+      <div>
+        <p className="text-xs sm:text-sm font-semibold text-white">Aesthetica</p>
+        <p className="text-xs text-slate-400">Fitness Coaching</p>
+      </div>
+    </div>
 
-          <nav className="hidden items-center gap-6 md:flex">
-            <button className="text-sm hover:text-white/90" onClick={() => scrollToId("programs")}>Programs</button>
-            <button className="text-sm hover:text-white/90" onClick={() => scrollToId("coaching")}>Coaching</button>
-            <button className="text-sm hover:text-white/90" onClick={() => scrollToId("results")}>Results</button>
-            <button className="text-sm hover:text-white/90" onClick={() => scrollToId("faq")}>FAQ</button>
-            <Button onClick={() => scrollToId("consult")} size="sm" className="bg-blue-600">Book Consult</Button>
-          </nav>
+    <nav className="hidden items-center gap-4 md:gap-6 md:flex">
+      <button className="text-sm hover:text-white/90" onClick={() => scrollToId("programs")}>Programs</button>
+      <button className="text-sm hover:text-white/90" onClick={() => scrollToId("coaching")}>Coaching</button>
+      <button className="text-sm hover:text-white/90" onClick={() => scrollToId("results")}>Results</button>
+      <button className="text-sm hover:text-white/90" onClick={() => scrollToId("faq")}>FAQ</button>
+      <Button onClick={() => scrollToId("consult")} size="sm" className="bg-blue-600">Book Consult</Button>
+    </nav>
 
-          <Button variant="outline" size="sm" className="md:hidden" onClick={() => scrollToId("consult")}>
-            Consult
-          </Button>
-        </div>
-      </header>
+    <Button variant="outline" size="sm" className="text-xs px-3 md:hidden" onClick={() => scrollToId("consult")}>
+      Consult
+    </Button>
+  </div>
+</header>
 
       {/* HERO */}
-      <section className="relative">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-10 px-4 pb-20 pt-16 md:grid-cols-2 md:pb-28 md:pt-24">
-          <div>
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              <Pill>Strength in Form</Pill>
-              <Pill>Muscle • Performance • Longevity</Pill>
-            </div>
+<section className="relative">
+  <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 sm:gap-10 px-3 sm:px-4 pb-12 sm:pb-20 pt-12 sm:pt-16 md:grid-cols-2 md:pb-28 md:pt-24">
+    <div>
+      <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2">
+        <Pill>Strength in Form</Pill>
+        <Pill>Muscle • Performance • Longevity</Pill>
+      </div>
 
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
-              Sculpt a powerful,{" "}
-              <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300 bg-clip-text text-transparent">
-                timeless physique
-              </span>
-            </h1>
+      <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
+        Sculpt a powerful,{" "}
+        <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300 bg-clip-text text-transparent">
+          timeless physique
+        </span>
+      </h1>
 
-            <p className="mt-4 max-w-xl text-slate-300">
-              No fluff. Evidence-based programming, clean nutrition guidance, and accountability that actually moves the
-              needle. Build a body that performs as good as it looks.
-            </p>
+      <p className="mt-3 sm:mt-4 max-w-xl text-base sm:text-lg text-slate-300">
+        No fluff. Evidence-based programming, clean nutrition guidance, and accountability that actually moves the
+        needle. Build a body that performs as good as it looks.
+      </p>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button size="lg" className="bg-blue-600" onClick={() => scrollToId("programs")}>
-                Browse Programs
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="bg-white text-black hover:text-blue-600"
-                onClick={() => scrollToId("consult")}
-              >
-                Free Consult <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
+      <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row flex-wrap gap-3">
+        <Button size="lg" className="bg-blue-600 w-full sm:w-auto" onClick={() => scrollToId("programs")}>
+          Browse Programs
+        </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          className="bg-white text-black hover:text-blue-600 w-full sm:w-auto"
+          onClick={() => scrollToId("consult")}
+        >
+          Free Consult <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
 
-            <div className="mt-6 flex items-center gap-5 text-xs text-slate-400">
-              <div className="flex items-center gap-2"><Shield className="h-4 w-4" /> Science-driven</div>
-              <div className="flex items-center gap-2"><Timer className="h-4 w-4" /> Busy-life friendly</div>
-              <div className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Sustainable results</div>
-            </div>
-          </div>
+      <div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-3 sm:gap-5 text-xs text-slate-400">
+        <div className="flex items-center gap-2"><Shield className="h-4 w-4" /> Science-driven</div>
+        <div className="flex items-center gap-2"><Timer className="h-4 w-4" /> Busy-life friendly</div>
+        <div className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Sustainable results</div>
+      </div>
+    </div>
 
-          <div className="relative">
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 blur-2xl" />
-            <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6 shadow-2xl">
-              <div className="grid grid-cols-3 gap-4">
-                <Stat label="Years Training" value="10+" />
-                <Stat label="Clients Helped" value="150+" />
-                <Stat label="Avg. PR Increase (12w)" value="12%" />
-              </div>
-              <div className="mt-6 grid grid-cols-3 gap-3 text-xs text-slate-300">
-                {["Hypertrophy", "Strength", "Body Recomp", "Mobility", "Conditioning", "Mindset"].map((t) => (
-                  <div key={t} className="rounded-xl border border-white/10 px-3 py-2 text-center">
-                    {t}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+    <div className="relative mt-8 md:mt-0">
+      <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 blur-2xl" />
+      <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 sm:p-6 shadow-2xl">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <Stat label="Years Training" value="10+" />
+          <Stat label="Clients Helped" value="150+" />
+          <Stat label="Avg. PR Increase (12w)" value="12%" />
         </div>
-
-        {/* selling points */}
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <SellingPoint icon={Dumbbell} title="Intelligent Training">
-              Periodized plans that progress week-to-week without wrecking your joints.
-            </SellingPoint>
-            <SellingPoint icon={Flame} title="Nutrition That Works">
-              Simple, high-protein frameworks for busy lifters. No starvation games.
-            </SellingPoint>
-            <SellingPoint icon={Sparkles} title="Accountability & Habits">
-              Systems that keep you consistent when motivation dips.
-            </SellingPoint>
-          </div>
+        <div className="mt-4 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-3 text-xs text-slate-300">
+          {["Hypertrophy", "Strength", "Body Recomp", "Mobility", "Conditioning", "Mindset"].map((t) => (
+            <div key={t} className="rounded-xl border border-white/10 px-2 py-1.5 sm:px-3 sm:py-2 text-center text-xs">
+              {t}
+            </div>
+          ))}
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+
+  {/* Enhanced selling points with mobile spacing */}
+  <div className="mx-auto max-w-6xl px-3 sm:px-4">
+    <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
+      <SellingPoint icon={Dumbbell} title="Intelligent Training">
+        Periodized plans that progress week-to-week without wrecking your joints.
+      </SellingPoint>
+      <SellingPoint icon={Flame} title="Nutrition That Works">
+        Simple, high-protein frameworks for busy lifters. No starvation games.
+      </SellingPoint>
+      <SellingPoint icon={Sparkles} title="Accountability & Habits">
+        Systems that keep you consistent when motivation dips.
+      </SellingPoint>
+    </div>
+  </div>
+</section>
 
       {/* PROGRAMS */}
       <section id="programs" className="mx-auto max-w-6xl px-4 py-20">
@@ -581,8 +585,8 @@ export default function AestheticaFitnessCoaching() {
  *************************************************/
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4 text-center">
-      <div className="text-2xl font-bold">{value}</div>
+    <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-2 sm:p-4 text-center">
+      <div className="text-lg sm:text-2xl font-bold">{value}</div>
       <div className="mt-1 text-xs text-slate-400">{label}</div>
     </div>
   );
