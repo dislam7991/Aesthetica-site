@@ -5,8 +5,7 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/Aesthetica-site' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/Aesthetica-site' : '',
+  // Remove basePath and assetPrefix for now to simplify
 }
 
 module.exports = nextConfig
