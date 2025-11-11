@@ -332,7 +332,35 @@ export default function AestheticaFitnessCoaching() {
       </SellingPoint>
     </div>
   </div>
+
+  {/* Subtle hero background image */}
+  <div aria-hidden className="absolute inset-0 -z-10">
+    <Image
+      src="physique/bg-hero.jpg"
+      alt=""
+      fill
+      priority
+      className="object-cover opacity-10 blur-[1px]"
+    />
+  </div>
 </section>
+
+      {/* FEATURED IMAGE (high visibility) */}
+      <section className="mx-auto max-w-6xl px-3 sm:px-4 pt-6 sm:pt-10">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10">
+          <Image
+            src="physique/hero-wide.jpg"
+            alt="Physique highlight"
+            width={1600}
+            height={900}
+            priority
+            className="h-auto w-full object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
+          />
+          {/* Gentle gradient for legibility */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
+        </div>
+      </section>
 
       {/* PROGRAMS */}
       <section id="programs" className="mx-auto max-w-6xl px-4 py-20">
@@ -400,8 +428,20 @@ export default function AestheticaFitnessCoaching() {
       </section>
 
       {/* COACHING */}
-      <section id="coaching" className="mx-auto max-w-6xl px-4 py-20">
-        <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2">
+      <section id="coaching" className="mx-auto max-w-6xl px-4 py-20 relative overflow-hidden">
+  {/* Background image (very subtle) */}
+  <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+    <Image
+      src="physique/bg-coaching.jpg"
+      alt=""
+      fill
+      className="object-cover opacity-10"
+    />
+    <div className="absolute inset-0 bg-slate-950/40" />
+  </div>
+
+  {/* Existing coaching content below */}
+  <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2">
           <div>
             <h2 className="text-3xl font-bold md:text-4xl">1:1 Coaching</h2>
             <p className="mt-3 text-slate-300">
@@ -446,7 +486,7 @@ export default function AestheticaFitnessCoaching() {
             </div>
           </div>
         </div>
-      </section>
+</section>
 
       {/* RESULTS */}
       <section id="results" className="mx-auto max-w-6xl px-4 py-20">
@@ -456,9 +496,9 @@ export default function AestheticaFitnessCoaching() {
         </p>
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           {[
-            { name: "Ahmed", quote: "Down 16 lbs in 10 weeks while adding 30 lbs to my bench.", stat: "-16 lb, +30 lb bench" },
-            { name: "Sara", quote: "Finally built glutes without killing my knees.", stat: "+2" },
-            { name: "Mark", quote: "Busy dad schedule, still got my first pull-up in 6 weeks.", stat: "1st pull-up" },
+            { name: "Amir", quote: "Added 170 lb to bench while body recomping, lost 10 lb of fat while gaining + 25 lb of muscle", stat: "-10 lb, +170 lb bench" },
+            { name: "Jasmine", quote: "Finally built glutes without killing my knees.", stat: "+2" },
+            { name: "Duncan", quote: "Busy schedule, lost 10 lb while getting abs and keeping strength", stat: "-10 lb" },
           ].map((t, i) => (
             <Card key={i}>
               <CardHeader>
@@ -470,7 +510,42 @@ export default function AestheticaFitnessCoaching() {
           ))}
         </div>
       </section>
-
+      
+      {/* GALLERY */}
+      <section id="gallery" className="mx-auto max-w-6xl px-3 sm:px-4 py-12 sm:py-20">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-3xl font-bold md:text-4xl">Gallery</h2>
+          <p className="mt-2 max-w-2xl text-slate-300">
+            Aesthetic strength, clean lines, sustainable progress.
+          </p>
+        </div>
+      
+        {/* Top row: 3 cards */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+          {[
+            { src: "physique/pose-1.jpg", alt: "Back double biceps" },
+            { src: "physique/pose-2.jpg", alt: "Side chest" },
+            { src: "physique/pose-3.jpg", alt: "Front relaxed" },
+          ].map((img) => (
+            <figure
+              key={img.src}
+              className="group relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/10"
+            >
+              <Image
+                src={img.src}
+                alt={img.alt}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 360px"
+              />
+              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent p-2 text-xs text-white/80">
+                {img.alt}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+      
       {/* FAQ */}
       <section id="faq" className="mx-auto max-w-6xl px-4 py-20">
         <h2 className="text-3xl font-bold md:text-4xl">FAQ</h2>
