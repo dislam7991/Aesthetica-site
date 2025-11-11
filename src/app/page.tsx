@@ -258,67 +258,83 @@ export default function AestheticaFitnessCoaching() {
 </header>
 
       {/* HERO */}
-<section className="relative">
-  <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 sm:gap-10 px-3 sm:px-4 pb-12 sm:pb-20 pt-12 sm:pt-16 md:grid-cols-2 md:pb-28 md:pt-24">
-    <div>
-      <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2">
-        <Pill>Strength in Form</Pill>
-        <Pill>Muscle • Performance • Longevity</Pill>
+<section className="relative isolate">
+  {/* Hero band: holds content + background; background stops at the end of this block */}
+  <div className="relative min-h-[420px] sm:min-h-[520px]">
+    <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 sm:gap-10 px-3 sm:px-4 pb-12 sm:pb-20 pt-12 sm:pt-16 md:grid-cols-2 md:pb-28 md:pt-24">
+      <div>
+        <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2">
+          <Pill>Strength in Form</Pill>
+          <Pill>Muscle • Performance • Longevity</Pill>
+        </div>
+
+        <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
+          Sculpt a powerful,{" "}
+          <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300 bg-clip-text text-transparent">
+            timeless physique
+          </span>
+        </h1>
+
+        <p className="mt-3 sm:mt-4 max-w-xl text-base sm:text-lg text-slate-300">
+          No fluff. Evidence-based programming, clean nutrition guidance, and accountability that actually moves the
+          needle. Build a body that performs as good as it looks.
+        </p>
+
+        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row flex-wrap gap-3">
+          <Button size="lg" className="bg-blue-600 w-full sm:w-auto" onClick={() => scrollToId("programs")}>
+            Browse Programs
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="bg-white text-black hover:text-blue-600 w-full sm:w-auto"
+            onClick={() => scrollToId("consult")}
+          >
+            Free Consult <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-3 sm:gap-5 text-xs text-slate-400">
+          <div className="flex items-center gap-2"><Shield className="h-4 w-4" /> Science-driven</div>
+          <div className="flex items-center gap-2"><Timer className="h-4 w-4" /> Busy-life friendly</div>
+          <div className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Sustainable results</div>
+        </div>
       </div>
 
-      <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
-        Sculpt a powerful,{" "}
-        <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300 bg-clip-text text-transparent">
-          timeless physique
-        </span>
-      </h1>
-
-      <p className="mt-3 sm:mt-4 max-w-xl text-base sm:text-lg text-slate-300">
-        No fluff. Evidence-based programming, clean nutrition guidance, and accountability that actually moves the
-        needle. Build a body that performs as good as it looks.
-      </p>
-
-      <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row flex-wrap gap-3">
-        <Button size="lg" className="bg-blue-600 w-full sm:w-auto" onClick={() => scrollToId("programs")}>
-          Browse Programs
-        </Button>
-        <Button
-          size="lg"
-          variant="outline"
-          className="bg-white text-black hover:text-blue-600 w-full sm:w-auto"
-          onClick={() => scrollToId("consult")}
-        >
-          Free Consult <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-
-      <div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-3 sm:gap-5 text-xs text-slate-400">
-        <div className="flex items-center gap-2"><Shield className="h-4 w-4" /> Science-driven</div>
-        <div className="flex items-center gap-2"><Timer className="h-4 w-4" /> Busy-life friendly</div>
-        <div className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Sustainable results</div>
+      <div className="relative mt-8 md:mt-0">
+        <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 blur-2xl" />
+        <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 sm:p-6 shadow-2xl">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <Stat label="Years Training" value="10+" />
+            <Stat label="Clients Helped" value="150+" />
+            <Stat label="Avg. PR Increase (12w)" value="12%" />
+          </div>
+          <div className="mt-4 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-3 text-xs text-slate-300">
+            {["Hypertrophy", "Strength", "Body Recomp", "Mobility", "Conditioning", "Mindset"].map((t) => (
+              <div key={t} className="rounded-xl border border-white/10 px-2 py-1.5 sm:px-3 sm:py-2 text-center text-xs">
+                {t}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
 
-    <div className="relative mt-8 md:mt-0">
-      <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 blur-2xl" />
-      <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 sm:p-6 shadow-2xl">
-        <div className="grid grid-cols-3 gap-2 sm:gap-4">
-          <Stat label="Years Training" value="10+" />
-          <Stat label="Clients Helped" value="150+" />
-          <Stat label="Avg. PR Increase (12w)" value="12%" />
-        </div>
-        <div className="mt-4 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-3 text-xs text-slate-300">
-          {["Hypertrophy", "Strength", "Body Recomp", "Mobility", "Conditioning", "Mindset"].map((t) => (
-            <div key={t} className="rounded-xl border border-white/10 px-2 py-1.5 sm:px-3 sm:py-2 text-center text-xs">
-              {t}
-            </div>
-          ))}
-        </div>
-      </div>
+    {/* Subtle hero background image (limited to the hero band above) */}
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+      <Image
+        src="/physique/bg-hero.jpg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover opacity-30 blur-[1px]"
+        style={{ objectPosition: "30% center" }} // bias to the right
+      />
     </div>
   </div>
 
-  {/* Enhanced selling points with mobile spacing */}
+  {/* Enhanced selling points with mobile spacing (no background behind this) */}
   <div className="mx-auto max-w-6xl px-3 sm:px-4">
     <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
       <SellingPoint icon={Dumbbell} title="Intelligent Training">
@@ -332,24 +348,13 @@ export default function AestheticaFitnessCoaching() {
       </SellingPoint>
     </div>
   </div>
-
-  {/* Subtle hero background image */}
-  <div aria-hidden className="absolute inset-0 -z-10">
-    <Image
-      src="physique/bg-hero.jpg"
-      alt=""
-      fill
-      priority
-      className="object-cover opacity-10 blur-[1px]"
-    />
-  </div>
 </section>
 
       {/* FEATURED IMAGE (high visibility) */}
       <section className="mx-auto max-w-6xl px-3 sm:px-4 pt-6 sm:pt-10">
         <div className="relative overflow-hidden rounded-3xl border border-white/10">
           <Image
-            src="physique/hero-wide.jpg"
+            src="/physique/hero-wide.jpg"
             alt="Physique highlight"
             width={1600}
             height={900}
@@ -428,20 +433,21 @@ export default function AestheticaFitnessCoaching() {
       </section>
 
       {/* COACHING */}
-      <section id="coaching" className="mx-auto max-w-6xl px-4 py-20 relative overflow-hidden">
-  {/* Background image (very subtle) */}
-  <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-    <Image
-      src="physique/bg-coaching.jpg"
-      alt=""
-      fill
-      className="object-cover opacity-10"
-    />
-    <div className="absolute inset-0 bg-slate-950/40" />
-  </div>
+      <section id="coaching" className="mx-auto max-w-6xl px-4 py-20 relative isolate overflow-hidden">
+        {/* Background image (very subtle) */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+          <Image
+            src="/physique/bg-coaching.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-slate-950/40" />
+        </div>
 
   {/* Existing coaching content below */}
-  <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2">
+  <div className="relative z-10 grid grid-cols-1 items-center gap-10 md:grid-cols-2">
           <div>
             <h2 className="text-3xl font-bold md:text-4xl">1:1 Coaching</h2>
             <p className="mt-3 text-slate-300">
@@ -523,9 +529,9 @@ export default function AestheticaFitnessCoaching() {
         {/* Top row: 3 cards */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
           {[
-            { src: "physique/pose-1.jpg", alt: "Back double biceps" },
-            { src: "physique/pose-2.jpg", alt: "Side chest" },
-            { src: "physique/pose-3.jpg", alt: "Front relaxed" },
+            { src: "/physique/pose-1.jpg", alt: "Front relaxed" },
+            { src: "/physique/pose-2.jpg", alt: "Back Double Bicep" },
+            { src: "/physique/pose-3.jpg", alt: "Front quarter turn" },
           ].map((img) => (
             <figure
               key={img.src}
