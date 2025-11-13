@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Dumbbell,
@@ -9,7 +9,7 @@ import {
   Shield,
   Timer,
   CheckCircle2,
-  ArrowRight,
+  ArrowRight, 
   Mail,
   Phone,
   Calendar,
@@ -204,6 +204,19 @@ const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checko
 export default function AestheticaFitnessCoaching() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", goals: "", time: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      const max = scrollHeight - clientHeight;
+      setScrollProgress(max > 0 ? (scrollTop / max) * 100 : 0);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -657,6 +670,13 @@ export default function AestheticaFitnessCoaching() {
           </div>
         </div>
       </footer>
+
+      <div className="fixed inset-x-0 top-0 z-50 h-1 bg-cyan-900/20">
+        <div
+          className="h-full bg-gradient-to-r from-sky-400 via-teal-400 to-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.55)] transition-[width] duration-150 ease-out"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
     </main>
   );
 }
