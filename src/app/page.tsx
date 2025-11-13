@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import {
   Dumbbell,
@@ -15,6 +15,7 @@ import {
   Calendar,
   ChevronDown,
 } from "lucide-react";
+import { motion, useReducedMotion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 /*************************************************
  * COMMERCE / SCHEDULING CONFIG
@@ -36,6 +37,53 @@ const scrollToId = (id: string) => {
 };
 
 const TRANSITION_CLASS = "transition-all duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)]";
+const MOTION_EASE: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 28, filter: "blur(10px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)" },
+};
+const heroImageVariant = {
+  hidden: { opacity: 0, y: 32, scale: 0.96 },
+  visible: { opacity: 1, y: 0, scale: 1 },
+};
+const staggerContainer = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.18, delayChildren: 0.08 },
+  },
+};
+const MAGNETIC_SPRING = { stiffness: 320, damping: 26, mass: 0.7 }
+
+function useMagnetic<T extends HTMLElement>(active: boolean) {
+  const ref = useRef<T | null>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, MAGNETIC_SPRING);
+  const springY = useSpring(y, MAGNETIC_SPRING);
+  const innerX = useTransform(springX, (value) => value * 0.1);
+  const innerY = useTransform(springY, (value) => value * 0.1);
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      if (!active || !ref.current) return;
+
+      const rect = ref.current.getBoundingClientRect();
+      const offsetX = event.clientX - (rect.left + rect.width / 2);
+      const offsetY = event.clientY - (rect.top + rect.height / 2);
+
+      x.set(offsetX * 0.04);
+      y.set(offsetY * 0.04);
+    },
+    [active, x, y]
+  );
+
+  const handlePointerLeave = useCallback(() => {
+    x.set(0);
+    y.set(0);
+  }, [x, y]);
+
+  return { ref, x: springX, y: springY, innerX, innerY, handlePointerMove, handlePointerLeave };
+}
 
 /*************************************************
  * SMALL, REUSABLE UI BITS (unstyled -> Tailwind only)
@@ -44,8 +92,22 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   asChild?: false;
   variant?: "solid" | "outline";
   size?: "sm" | "md" | "lg";
+  magnetic?: boolean;
 };
-function Button({ variant = "solid", size = "md", className = "", ...props }: ButtonProps) {
+function Button({
+  variant = "solid",
+  size = "md",
+  className = "",
+  magnetic = false,
+  children,
+  style,
+  onPointerMove,
+  onPointerLeave,
+  ...props
+}: ButtonProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const active = magnetic && !prefersReducedMotion;
+  const { ref, x, y, innerX, innerY, handlePointerMove, handlePointerLeave } = useMagnetic<HTMLButtonElement>(active);
   const base =
     `${TRANSITION_CLASS} inline-flex items-center justify-center rounded-full font-medium focus:outline-none focus:ring-2 focus:ring-offset-2`;
   const sizes = {
@@ -60,7 +122,38 @@ function Button({ variant = "solid", size = "md", className = "", ...props }: Bu
       "border border-black/15 bg-white text-black hover:text-blue-600 dark:border-white/20 dark:bg-transparent dark:text-white",
   }[variant];
 
-  return <button className={`${base} ${sizes} ${variants} ${className}`} {...props} />;
+  const motionStyle = active ? ({ ...(style ?? {}), x, y } as any) : style;
+  const contentClass = "relative inline-flex items-center gap-2";
+  const content = active ? (
+    <motion.span style={{ x: innerX, y: innerY }} className={contentClass}>
+      {children}
+    </motion.span>
+  ) : (
+    <span className={contentClass}>{children}</span>
+  );
+
+  const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, ...motionProps } = props;
+
+  return (
+    <motion.button
+      ref={ref}
+      className={`${base} ${sizes} ${variants} ${className} ${active ? "relative overflow-hidden" : ""}`}
+      style={motionStyle}
+      onPointerMove={(event) => {
+        if (active) handlePointerMove(event);
+        onPointerMove?.(event);
+      }}
+      onPointerLeave={(event) => {
+        if (active) handlePointerLeave();
+        onPointerLeave?.(event);
+      }}
+      whileHover={active ? { scale: 1.02 } : undefined}
+      whileTap={active ? { scale: 0.98 } : undefined}
+      {...motionProps}
+    >
+      {content}
+    </motion.button>
+  );
 }
 
 function AnchorButton({
@@ -69,6 +162,10 @@ function AnchorButton({
   variant = "solid",
   size = "md",
   className = "",
+  magnetic = false,
+  style,
+  onPointerMove,
+  onPointerLeave,
   ...rest
 }: {
   href: string;
@@ -76,7 +173,11 @@ function AnchorButton({
   variant?: "solid" | "outline";
   size?: "sm" | "md" | "lg";
   className?: string;
+  magnetic?: boolean;
 } & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
+  const prefersReducedMotion = useReducedMotion();
+  const active = magnetic && !prefersReducedMotion;
+  const { ref, x, y, innerX, innerY, handlePointerMove, handlePointerLeave } = useMagnetic<HTMLAnchorElement>(active);
   const base =
     `${TRANSITION_CLASS} inline-flex items-center justify-center rounded-full font-medium focus:outline-none focus:ring-2 focus:ring-offset-2`;
   const sizes = {
@@ -91,10 +192,35 @@ function AnchorButton({
       "border border-black/15 bg-white text-black hover:text-blue-600 dark:border-white/20 dark:bg-transparent dark:text-white",
   }[variant];
 
+  // Filter out HTML drag events and animation events that conflict with Framer Motion
+  const { onDrag, onDragStart, onDragEnd, onDragOver, onDragEnter, onDragLeave, onDrop, onAnimationStart, onAnimationEnd, onAnimationIteration, ...motionProps } = rest;
+
   return (
-    <a href={href} className={`${base} ${sizes} ${variants} ${className}`} {...rest}>
-      {children}
-    </a>
+    <motion.a
+      ref={ref}
+      href={href}
+      className={`${base} ${sizes} ${variants} ${className} ${active ? "relative overflow-hidden" : ""}`}
+      style={active ? ({ ...(style ?? {}), x, y } as any) : style}
+      onPointerMove={(event) => {
+        if (active) handlePointerMove(event);
+        onPointerMove?.(event);
+      }}
+      onPointerLeave={(event) => {
+        if (active) handlePointerLeave();
+        onPointerLeave?.(event);
+      }}
+      whileHover={active ? { scale: 1.015 } : undefined}
+      whileTap={active ? { scale: 0.985 } : undefined}
+      {...motionProps}
+    >
+      {active ? (
+        <motion.span style={{ x: innerX, y: innerY }} className="relative inline-flex items-center gap-2">
+          {children}
+        </motion.span>
+      ) : (
+        <span className="relative inline-flex items-center gap-2">{children}</span>
+      )}
+    </motion.a>
   );
 }
 
@@ -167,45 +293,60 @@ type ProgramCardProps = {
   checkoutUrl: string;
   badge?: string;
 };
-const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checkoutUrl, badge }: ProgramCardProps) => (
-  <Card className="group relative overflow-visible bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-xl hover:-translate-y-2 hover:border-white/20 hover:shadow-[0_28px_52px_-28px_rgba(56,189,248,0.55)]">
-    <div className="pointer-events-none absolute inset-0 opacity-40 [background:radial-gradient(1200px_500px_at_80%_-20%,rgba(59,130,246,.3),transparent_60%)]" />
-    {badge && (
-      <span className="pointer-events-none absolute left-1/2 top-0 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-gradient-to-r from-sky-400/25 via-cyan-300/25 to-teal-300/25 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-teal-100 shadow-[0_18px_45px_-18px_rgba(34,211,238,0.6)] backdrop-blur-md">
-        <Sparkles className="h-4 w-4 text-teal-100" />
-        {badge}
-      </span>
-    )}
-    <CardHeader>
-      <div className="mb-2">
-        <span className="inline-flex items-center rounded-full bg-blue-500/10 px-3 py-1 text-xs text-blue-200">
-          {label}
-        </span>
-      </div>
-      <CardTitle className="flex items-center gap-3 text-2xl">
-        <Icon className="h-7 w-7" />
-        <span>{title}</span>
-      </CardTitle>
-      <p className="mt-1 text-sm text-slate-300">{tagline}</p>
-    </CardHeader>
-    <CardContent className="space-y-3">
-      <div className="text-3xl font-semibold">
-        ${price}
-        <span className="ml-1 text-base font-normal text-slate-300"> one-time</span>
-      </div>
-      <div className="space-y-2">
-        {bullets.map((b, i) => (
-          <Feature key={i}>{b}</Feature>
-        ))}
-      </div>
-    </CardContent>
-    <CardFooter>
-      <AnchorButton href={checkoutUrl} target="_blank" rel="noreferrer" size="lg" className="w-full">
-        Get Program <ArrowRight className="ml-2 h-4 w-4" />
-      </AnchorButton>
-    </CardFooter>
-  </Card>
-);
+const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checkoutUrl, badge }: ProgramCardProps) => {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className="group relative"
+      initial={prefersReducedMotion ? undefined : "hidden"}
+      whileInView={prefersReducedMotion ? undefined : "visible"}
+      viewport={{ once: true, amount: 0.35 }}
+      variants={prefersReducedMotion ? undefined : fadeUpVariant}
+      transition={{ duration: 0.6, ease: MOTION_EASE }}
+      whileHover={prefersReducedMotion ? undefined : { y: -12, scale: 1.01 }}
+      whileTap={prefersReducedMotion ? undefined : { y: -4 }}
+    >
+      <Card className="relative overflow-visible bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-xl hover:border-white/20 hover:shadow-[0_28px_52px_-28px_rgba(56,189,248,0.55)]">
+        <div className="pointer-events-none absolute inset-0 opacity-40 [background:radial-gradient(1200px_500px_at_80%_-20%,rgba(59,130,246,.3),transparent_60%)]" />
+        {badge && (
+          <span className="pointer-events-none absolute left-1/2 top-0 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-gradient-to-r from-sky-400/25 via-cyan-300/25 to-teal-300/25 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-teal-100 shadow-[0_18px_45px_-18px_rgba(34,211,238,0.6)] backdrop-blur-md">
+            <Sparkles className="h-4 w-4 text-teal-100" />
+            {badge}
+          </span>
+        )}
+        <CardHeader>
+          <div className="mb-2">
+            <span className="inline-flex items-center rounded-full bg-blue-500/10 px-3 py-1 text-xs text-blue-200">
+              {label}
+            </span>
+          </div>
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <Icon className="h-7 w-7" />
+            <span>{title}</span>
+          </CardTitle>
+          <p className="mt-1 text-sm text-slate-300">{tagline}</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="text-3xl font-semibold">
+            ${price}
+            <span className="ml-1 text-base font-normal text-slate-300"> one-time</span>
+          </div>
+          <div className="space-y-2">
+            {bullets.map((b, i) => (
+              <Feature key={i}>{b}</Feature>
+            ))}
+          </div>
+        </CardContent>
+        <CardFooter>
+          <AnchorButton magnetic href={checkoutUrl} target="_blank" rel="noreferrer" size="lg" className="w-full">
+            Get Program <ArrowRight className="ml-2 h-4 w-4" />
+          </AnchorButton>
+        </CardFooter>
+      </Card>
+    </motion.div>
+  );
+};
 
 /*************************************************
  * PAGE
@@ -214,6 +355,8 @@ export default function AestheticaFitnessCoaching() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", goals: "", time: "" });
   const [submitting, setSubmitting] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -283,8 +426,16 @@ export default function AestheticaFitnessCoaching() {
 <section className="relative isolate">
   {/* Hero band: holds content + background; background stops at the end of this block */}
   <div className="relative min-h-[420px] sm:min-h-[520px]">
-    <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 sm:gap-10 px-3 sm:px-4 pb-12 sm:pb-20 pt-12 sm:pt-16 md:grid-cols-2 md:pb-28 md:pt-24">
-      <div>
+    <motion.div
+      className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 sm:gap-10 px-3 sm:px-4 pb-12 sm:pb-20 pt-12 sm:pt-16 md:grid-cols-2 md:pb-28 md:pt-24"
+      initial={prefersReducedMotion ? undefined : "hidden"}
+      animate={prefersReducedMotion ? undefined : "visible"}
+      variants={prefersReducedMotion ? undefined : staggerContainer}
+    >
+      <motion.div
+        variants={prefersReducedMotion ? undefined : fadeUpVariant}
+        transition={{ duration: 0.7, ease: MOTION_EASE }}
+      >
         <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2">
           <Pill>Strength in Form</Pill>
           <Pill>Muscle • Performance • Longevity</Pill>
@@ -303,10 +454,11 @@ export default function AestheticaFitnessCoaching() {
         </p>
 
         <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row flex-wrap gap-3">
-          <Button size="lg" className="bg-blue-600 w-full sm:w-auto" onClick={() => scrollToId("programs")}>
+          <Button magnetic size="lg" className="bg-blue-600 w-full sm:w-auto" onClick={() => scrollToId("programs")}>
             Browse Programs
           </Button>
           <Button
+            magnetic
             size="lg"
             variant="outline"
             className="bg-white text-black hover:text-blue-600 w-full sm:w-auto"
@@ -321,9 +473,13 @@ export default function AestheticaFitnessCoaching() {
           <div className="flex items-center gap-2"><Timer className="h-4 w-4" /> Busy-life friendly</div>
           <div className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Sustainable results</div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="relative mt-8 md:mt-0">
+      <motion.div
+        className="relative mt-8 md:mt-0"
+        variants={prefersReducedMotion ? undefined : heroImageVariant}
+        transition={{ duration: 0.8, ease: MOTION_EASE }}
+      >
         <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 blur-2xl" />
         <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 sm:p-6 shadow-2xl">
           <div className="grid grid-cols-3 gap-2 sm:gap-4">
@@ -339,36 +495,21 @@ export default function AestheticaFitnessCoaching() {
             ))}
           </div>
         </div>
-      </div>
-    </div>
-
-    {/* Subtle hero background image (limited to the hero band above) */}
-    <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
-      <Image
-        src="/physique/bg-hero.jpg"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover opacity-30 blur-[1px]"
-        style={{ objectPosition: "30% center" }} // bias to the right
-      />
-    </div>
+      </motion.div>
+    </motion.div>
   </div>
 
-  {/* Enhanced selling points with mobile spacing (no background behind this) */}
-  <div className="mx-auto max-w-6xl px-3 sm:px-4">
-    <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
-      <SellingPoint icon={Dumbbell} title="Intelligent Training">
-        Periodized plans that progress week-to-week without wrecking your joints.
-      </SellingPoint>
-      <SellingPoint icon={Flame} title="Nutrition That Works">
-        Simple, high-protein frameworks for busy lifters. No starvation games.
-      </SellingPoint>
-      <SellingPoint icon={Sparkles} title="Accountability & Habits">
-        Systems that keep you consistent when motivation dips.
-      </SellingPoint>
-    </div>
+  {/* Subtle hero background image (limited to the hero band above) */}
+  <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+    <Image
+      src="/physique/bg-hero.jpg"
+      alt=""
+      fill
+      priority
+      sizes="100vw"
+      className="object-cover opacity-30 blur-[1px]"
+      style={{ objectPosition: "30% center" }} // bias to the right
+    />
   </div>
 </section>
 
@@ -484,7 +625,7 @@ export default function AestheticaFitnessCoaching() {
               <Feature>Messaging access for quick form checks & adjustments</Feature>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button className="bg-blue-600" onClick={() => scrollToId("consult")}>
+              <Button magnetic className="bg-blue-600" onClick={() => scrollToId("consult")}>
                 Book Consultation
               </Button>
               <Button
@@ -658,13 +799,13 @@ export default function AestheticaFitnessCoaching() {
             </div>
 
             <div className="pt-2">
-              <Button disabled={submitting} size="lg" className="w-full bg-blue-600">
+              <Button magnetic disabled={submitting} size="lg" className="w-full bg-blue-600">
                 {submitting ? "Sending…" : "Request Consultation"}
               </Button>
             </div>
 
             <div className="pt-3">
-              <AnchorButton href={CALENDLY} target="_blank" rel="noreferrer" variant="outline" className="w-full">
+              <AnchorButton magnetic href={CALENDLY} target="_blank" rel="noreferrer" variant="outline" className="w-full">
                 Or schedule instantly on Calendly
               </AnchorButton>
             </div>
@@ -715,8 +856,19 @@ function SellingPoint({
   title: string;
   children: React.ReactNode;
 }) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
-    <div className={`${TRANSITION_CLASS} rounded-3xl border border-white/10 bg-slate-900/60 p-6 hover:-translate-y-2 hover:border-white/20 hover:bg-slate-900/80 hover:shadow-[0_24px_48px_-28px_rgba(56,189,248,0.45)]`}>
+    <motion.div
+      className={`${TRANSITION_CLASS} rounded-3xl border border-white/10 bg-slate-900/60 p-6 hover:border-white/20 hover:bg-slate-900/80 hover:shadow-[0_24px_48px_-28px_rgba(56,189,248,0.45)]`}
+      initial={prefersReducedMotion ? undefined : "hidden"}
+      whileInView={prefersReducedMotion ? undefined : "visible"}
+      viewport={{ once: true, amount: 0.3 }}
+      variants={prefersReducedMotion ? undefined : fadeUpVariant}
+      transition={{ duration: 0.55, ease: MOTION_EASE }}
+      whileHover={prefersReducedMotion ? undefined : { y: -10, scale: 1.01 }}
+      whileTap={prefersReducedMotion ? undefined : { y: -4 }}
+    >
       <div className="mb-3 flex items-center gap-3">
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-teal-400/20">
           <Icon className="h-5 w-5 text-teal-200" />
@@ -724,7 +876,7 @@ function SellingPoint({
         <h3 className="text-lg font-semibold">{title}</h3>
       </div>
       <p className="text-sm text-slate-300">{children}</p>
-    </div>
+    </motion.div>
   );
 }
 
