@@ -165,10 +165,17 @@ type ProgramCardProps = {
   bullets: string[];
   label: string;
   checkoutUrl: string;
+  badge?: string;
 };
-const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checkoutUrl }: ProgramCardProps) => (
-  <Card className="group relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-xl hover:-translate-y-2 hover:border-white/20 hover:shadow-[0_28px_52px_-28px_rgba(56,189,248,0.55)]">
+const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checkoutUrl, badge }: ProgramCardProps) => (
+  <Card className="group relative overflow-visible bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-xl hover:-translate-y-2 hover:border-white/20 hover:shadow-[0_28px_52px_-28px_rgba(56,189,248,0.55)]">
     <div className="pointer-events-none absolute inset-0 opacity-40 [background:radial-gradient(1200px_500px_at_80%_-20%,rgba(59,130,246,.3),transparent_60%)]" />
+    {badge && (
+      <span className="pointer-events-none absolute left-1/2 top-0 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-gradient-to-r from-sky-400/25 via-cyan-300/25 to-teal-300/25 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-teal-100 shadow-[0_18px_45px_-18px_rgba(34,211,238,0.6)] backdrop-blur-md">
+        <Sparkles className="h-4 w-4 text-teal-100" />
+        {badge}
+      </span>
+    )}
     <CardHeader>
       <div className="mb-2">
         <span className="inline-flex items-center rounded-full bg-blue-500/10 px-3 py-1 text-xs text-blue-200">
@@ -419,6 +426,7 @@ export default function AestheticaFitnessCoaching() {
             price={99}
             label="Advanced"
             checkoutUrl={STRIPE.ELITE}
+            badge="Most Popular"
             bullets={[
               "Periodized mesocycles (12 weeks)",
               "Specialization blocks for lagging parts",
