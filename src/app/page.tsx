@@ -16,6 +16,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { motion, useReducedMotion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 /*************************************************
  * COMMERCE / SCHEDULING CONFIG
@@ -52,7 +54,7 @@ const staggerContainer = {
     transition: { staggerChildren: 0.18, delayChildren: 0.08 },
   },
 };
-const MAGNETIC_SPRING = { stiffness: 320, damping: 26, mass: 0.7 }
+const MAGNETIC_SPRING = { stiffness: 320, damping: 26, mass: 0.7 };
 
 function useMagnetic<T extends HTMLElement>(active: boolean) {
   const ref = useRef<T | null>(null);
@@ -719,6 +721,9 @@ export default function AestheticaFitnessCoaching() {
         </div>
       </section>
       
+      {/* SCROLL SCRUB PHYSIQUE */}
+      <ScrollScrubPhysique />
+
       {/* FAQ */}
       <section id="faq" className="mx-auto max-w-6xl px-4 py-20">
         <h2 className="text-3xl font-bold md:text-4xl">FAQ</h2>
@@ -888,3 +893,167 @@ function FAQ({ q, a }: { q: string; a: string }) {
     </div>
   );
 }
+
+const ScrollScrubPhysique = () => {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const calloutRefs = useRef<HTMLDivElement[]>([]);
+
+  const callouts = [
+    {
+      title: "Body Fat",
+      value: "8%",
+      subtitle: "Stage-ready conditioning",
+      position: "left-4 top-[18%] md:left-16 md:top-[24%]",
+    },
+    {
+      title: "Lean Mass",
+      value: "54%",
+      subtitle: "Measured via DEXA",
+      position: "right-4 top-[38%] md:right-16 md:top-[32%]",
+    },
+    {
+      title: "PR Totals",
+      value: "335 / 250 / 475",
+      subtitle: "Squat · Bench · Deadlift",
+      position: "left-1/2 bottom-10 -translate-x-1/2 md:left-auto md:right-16",
+    },
+  ];
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const video = videoRef.current;
+    if (!section || !video) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    let context: gsap.Context | undefined;
+
+    const setupTimeline = () => {
+      if (prefersReducedMotion || !sectionRef.current || !videoRef.current) return undefined;
+
+      const videoEl = videoRef.current;
+      videoEl.pause();
+      videoEl.currentTime = 0;
+
+      const ctx = gsap.context(() => {
+        const tl = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: {
+            trigger: sectionRef.current!,
+            start: "top top",
+            end: () => `+=${window.innerHeight * 3}`,
+            scrub: true,
+            pin: true,
+            anticipatePin: 1,
+          },
+        });
+
+        tl.fromTo(
+          videoEl,
+          { currentTime: 0 },
+          { currentTime: videoEl.duration || 1, duration: 1 }
+        );
+
+        calloutRefs.current.forEach((el, index) => {
+          const enterAt = 0.18 + index * 0.22;
+          tl.fromTo(
+            el,
+            { autoAlpha: 0, y: 40 },
+            { autoAlpha: 1, y: 0, duration: 0.35, ease: "power3.out" },
+            enterAt
+          );
+          tl.to(
+            el,
+            { autoAlpha: 0, y: -36, duration: 0.3, ease: "power2.in" },
+            enterAt + 0.28
+          );
+        });
+      }, sectionRef);
+
+      ScrollTrigger.refresh();
+      return ctx;
+    };
+
+    const handleLoaded = () => {
+      context?.revert();
+      context = setupTimeline();
+    };
+
+    if (video.readyState >= 1) {
+      handleLoaded();
+    } else {
+      video.addEventListener("loadedmetadata", handleLoaded);
+    }
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleLoaded);
+      context?.revert();
+    };
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!prefersReducedMotion) return;
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
+  }, [prefersReducedMotion]);
+
+  return (
+    <section ref={sectionRef} className="relative isolate overflow-hidden bg-slate-950 py-24 sm:py-32">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_480px_at_20%_20%,rgba(56,189,248,0.12),transparent_60%),radial-gradient(900px_480px_at_80%_80%,rgba(56,189,248,0.08),transparent_70%)]" />
+      <div className="relative mx-auto max-w-5xl px-3 sm:px-4 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.4em] text-teal-300/80">
+          ScrollScrub Physique
+        </p>
+        <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">Scroll through the physique journey</h2>
+        <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-400 sm:text-base">
+          Scrub the posing reel with your scroll wheel. Watch the physique come to life as key stats pulse into view.
+        </p>
+      </div>
+
+      <div className="relative mx-auto mt-12 flex max-w-4xl flex-col items-center px-3 sm:px-4">
+        <div className="relative aspect-[9/16] w-full max-w-[540px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-black shadow-[0_40px_120px_-50px_rgba(34,211,238,0.45)]">
+          <video
+            ref={videoRef}
+            src="/physique/website-video-1.mp4"
+            playsInline
+            muted
+            preload="metadata"
+            controls={prefersReducedMotion ?? false}
+            className="h-full w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/0 via-slate-950/10 to-slate-950/30" />
+          {callouts.map((callout, idx) => (
+            <div
+              key={callout.title}
+              ref={(el) => {
+                if (el) calloutRefs.current[idx] = el;
+              }}
+              className={`pointer-events-none absolute w-[180px] rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left backdrop-blur-md shadow-[0_24px_60px_-30px_rgba(56,189,248,0.55)] ${callout.position} ${prefersReducedMotion ? "opacity-100" : "opacity-0"}`}
+            >
+              <p className="text-xs uppercase tracking-[0.3em] text-teal-200/80">{callout.title}</p>
+              <p className="mt-2 text-2xl font-semibold text-white">{callout.value}</p>
+              <p className="mt-1 text-xs text-slate-300">{callout.subtitle}</p>
+            </div>
+          ))}
+        </div>
+        {!prefersReducedMotion && (
+          <p className="mt-6 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-400/80">
+            <span className="h-px w-8 bg-slate-600/60" />
+            Scroll to scrub
+            <span className="h-px w-8 bg-slate-600/60" />
+          </p>
+        )}
+        {prefersReducedMotion && (
+          <p className="mt-6 text-xs text-slate-400">
+            Motion reduced — use the transport controls to explore the reel.
+          </p>
+        )}
+      </div>
+    </section>
+  );
+};
