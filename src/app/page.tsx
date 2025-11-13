@@ -67,8 +67,8 @@ type PhysiqueCallout = {
 
 const PHYSIQUE_CALLOUTS: PhysiqueCallout[] = [
   {
-    title: "Shoulder Symmetry",
-    description: "Lateral cluster sets and tempo overhead work for that 3D cap.",
+    title: "Wide 3D Delts",
+    description: "Capped shoulders and rear delt density for the 3D look",
     anchor: { x: 68, y: 45 },
     text: { x: 78, y: 35 },
     points: [
@@ -79,8 +79,8 @@ const PHYSIQUE_CALLOUTS: PhysiqueCallout[] = [
     align: "right",
   },
   {
-    title: "Chest Density",
-    description: "Paused presses plus stretch-focused flyes keep the midline thick.",
+    title: "Chest Density + Fullness",
+    description: "Upper chest mass with full sternal thickness",
     anchor: { x: 42, y: 52 },
     text: { x: 18, y: 46 },
     points: [
@@ -91,8 +91,8 @@ const PHYSIQUE_CALLOUTS: PhysiqueCallout[] = [
     align: "left",
   },
   {
-    title: "Arm Detailing",
-    description: "Alternating push–pull supersets to pack the biceps and triceps.",
+    title: "Jacked, Vascular Arms",
+    description: "Thick biceps, triceps, and forearm detail",
     anchor: { x: 32, y: 65 },
     text: { x: 20, y: 67 },
     points: [
@@ -103,8 +103,8 @@ const PHYSIQUE_CALLOUTS: PhysiqueCallout[] = [
     align: "left",
   },
   {
-    title: "Lat–Waist Tie-In",
-    description: "Weighted pullovers with vacuum work carves the V-taper.",
+    title: "Sculpted V-Taper",
+    description: "Lat sweep into  tight waist for the classic X-frame",
     anchor: { x: 62, y: 74 },
     text: { x: 81, y: 80 },
     points: [
@@ -571,7 +571,7 @@ export default function AestheticaFitnessCoaching() {
       priority
       sizes="100vw"
       className="object-cover opacity-30 blur-[1px]"
-      style={{ objectPosition: "30% center" }} // bias to the right
+      style={{ objectPosition: "30% 17%" }} // bias to the right
     />
   </div>
 </section>
@@ -1016,7 +1016,7 @@ const PhysiqueCalloutShowcase = () => {
           Dialed-in proportions, showcased
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-400">
-          Scroll to dissect the physique—each region lights up with the method behind the detail.
+          Scroll to dissect the optimal aesthetic physique; each region lights up with the method behind the muscle.
         </p>
       </div>
 
@@ -1228,11 +1228,11 @@ const ScrollScrubPhysique = () => {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_480px_at_20%_20%,rgba(56,189,248,0.12),transparent_60%),radial-gradient(900px_480px_at_80%_80%,rgba(56,189,248,0.08),transparent_70%)]" />
       <div className="relative mx-auto max-w-3xl px-3 text-center sm:px-4">
         <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-teal-300/80">
-          ScrollScrub Physique
+          Strength x Form
         </p>
         <h2 className="mt-3 text-3xl font-semibold sm:text-[2.1rem]">Scroll the posing reel</h2>
         <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
-          Glide through the routine and watch the metrics pulse in as you explore.
+          Glide through the routine to explore your potential for power and aesthetics.
         </p>
       </div>
 
