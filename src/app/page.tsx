@@ -56,6 +56,67 @@ const staggerContainer = {
 };
 const MAGNETIC_SPRING = { stiffness: 320, damping: 26, mass: 0.7 };
 
+type PhysiqueCallout = {
+  title: string;
+  description: string;
+  anchor: { x: number; y: number };
+  text: { x: number; y: number };
+  points: { x: number; y: number }[];
+  align: "left" | "right";
+};
+
+const PHYSIQUE_CALLOUTS: PhysiqueCallout[] = [
+  {
+    title: "Shoulder Symmetry",
+    description: "Lateral cluster sets and tempo overhead work for that 3D cap.",
+    anchor: { x: 68, y: 45 },
+    text: { x: 78, y: 35 },
+    points: [
+      { x: 68, y: 45 },
+      { x: 72, y: 18 },
+      { x: 86, y: 16 },
+    ],
+    align: "right",
+  },
+  {
+    title: "Chest Density",
+    description: "Paused presses plus stretch-focused flyes keep the midline thick.",
+    anchor: { x: 42, y: 52 },
+    text: { x: 18, y: 46 },
+    points: [
+      { x: 52, y: 32 },
+      { x: 34, y: 32 },
+      { x: 18, y: 26 },
+    ],
+    align: "left",
+  },
+  {
+    title: "Arm Detailing",
+    description: "Alternating push–pull supersets to pack the biceps and triceps.",
+    anchor: { x: 32, y: 65 },
+    text: { x: 20, y: 67 },
+    points: [
+      { x: 72, y: 67 },
+      { x: 74, y: 43 },
+      { x: 84, y: 44 },
+    ],
+    align: "left",
+  },
+  {
+    title: "Lat–Waist Tie-In",
+    description: "Weighted pullovers with vacuum work carves the V-taper.",
+    anchor: { x: 62, y: 74 },
+    text: { x: 81, y: 80 },
+    points: [
+      { x: 50, y: 58 },
+      { x: 32, y: 60 },
+      { x: 18, y: 68 },
+    ],
+    align: "right",
+  },
+];
+
+
 function useMagnetic<T extends HTMLElement>(active: boolean) {
   const ref = useRef<T | null>(null);
   const x = useMotionValue(0);
@@ -515,22 +576,8 @@ export default function AestheticaFitnessCoaching() {
   </div>
 </section>
 
-      {/* FEATURED IMAGE (high visibility) */}
-      <section className="mx-auto max-w-6xl px-3 sm:px-4 pt-6 sm:pt-10">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10">
-          <Image
-            src="/physique/hero-wide.jpg"
-            alt="Physique highlight"
-            width={1600}
-            height={900}
-            priority
-            className="h-auto w-full object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
-          />
-          {/* Gentle gradient for legibility */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
-        </div>
-      </section>
+      {/* PHYSIQUE ANATOMY SCROLLYTELLING */}
+      <PhysiqueCalloutShowcase />
 
       {/* PROGRAMS */}
       <section id="programs" className="mx-auto max-w-6xl px-4 py-20">
@@ -894,44 +941,217 @@ function FAQ({ q, a }: { q: string; a: string }) {
   );
 }
 
+const PhysiqueCalloutShowcase = () => {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const pinnedRef = useRef<HTMLDivElement | null>(null);
+  const calloutRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    calloutRefs.current = calloutRefs.current.slice(0, PHYSIQUE_CALLOUTS.length);
+
+    const pinned = pinnedRef.current;
+    if (!pinned) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    if (prefersReducedMotion) {
+      calloutRefs.current.forEach((node) => {
+        if (node) gsap.set(node, { autoAlpha: 1, y: 0 });
+      });
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      const timeline = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: pinned,                          // 🔥 trigger on the image container itself
+          start: "top top",                         // pin when the *image* hits the top of the viewport
+          end: () => `+=${window.innerHeight * 2.4}`,
+          scrub: true,
+          pin: pinned,
+          pinSpacing: true,
+        },
+      });
+
+      // (optional) small lead-in so nothing happens for the first bit of scroll
+      timeline.to({}, { duration: 0.12 });
+
+      calloutRefs.current.forEach((element, index) => {
+        if (!element) return;
+        const enterAt = 0.15 + index * 0.35;
+
+        timeline.fromTo(
+          element,
+          { autoAlpha: 0, y: 24 },
+          { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" },
+          enterAt
+        );
+        timeline.to(
+          element,
+          { autoAlpha: 0, y: -20, duration: 0.35, ease: "power2.in" },
+          enterAt + 0.32
+        );
+      });
+
+      timeline.to({}, { duration: 0.3 });
+
+      ScrollTrigger.refresh();
+    }, pinned);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="mx-auto max-w-6xl px-3 sm:px-4 pt-6 sm:pt-10 pb-16 sm:pb-20"
+    >
+      <div className="mx-auto max-w-3xl text-center">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-teal-300/80">
+          Anatomy Highlight
+        </p>
+        <h2 className="mt-3 text-3xl font-semibold sm:text-[2.1rem]">
+          Dialed-in proportions, showcased
+        </h2>
+        <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-400">
+          Scroll to dissect the physique—each region lights up with the method behind the detail.
+        </p>
+      </div>
+
+      <div
+        ref={pinnedRef}
+        className="relative mx-auto mt-6 sm:mt-8 w-full overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-[0_40px_160px_-70px_rgba(34,211,238,0.45)]"
+      >
+        <Image
+          src="/physique/hero-wide.jpg"
+          alt="Full physique spotlight"
+          width={1600}
+          height={900}
+          priority
+          className="h-auto w-full object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
+        />
+        {/* same gradient feel as original featured image */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
+
+          {PHYSIQUE_CALLOUTS.map((callout, index) => {
+            // Build arrow geometry:
+            // 1. Start at the text box edge (horizontal),
+            // 2. Go horizontal,
+            // 3. Then angle into the anchor.
+            const textX = callout.text.x;
+            const textY = callout.text.y;
+
+            // start slightly outside the text box, on its midline
+            const startX = callout.align === "left" ? textX + 1 : textX - 1;
+            const startY = textY;
+
+            // mid point: horizontal line halfway toward the anchor
+            const midX = (startX + callout.anchor.x) / 2;
+            const midY = startY;
+
+            // end: the actual anchor on your physique
+            const endX = callout.anchor.x;
+            const endY = callout.anchor.y;
+
+            const points = `${startX},${startY} ${midX},${midY} ${endX},${endY}`;
+
+            const textStyle: React.CSSProperties = {
+              top: `${callout.text.y}%`,
+              left: `${callout.text.x}%`,
+              transform: `translate(${callout.align === "left" ? "-100%" : "0"}, -50%)`,
+            };
+
+            return (
+              <div
+                key={callout.title}
+                ref={(el) => {
+                  calloutRefs.current[index] = el;
+                }}
+                className="pointer-events-none absolute inset-0 opacity-0"
+              >
+                {/* White, thin, horizontal-then-angled arrow with a ball at the physique point */}
+                <svg
+                  className="absolute inset-0 h-full w-full"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  {/* ball where it hits the muscle */}
+                  <circle cx={endX} cy={endY} r="0.9" fill="white" />
+
+                  <polyline
+                    points={points}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="0.3"          // thinner line
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+
+                <div
+                  className={`absolute max-w-[190px] rounded-2xl border border-white/15 bg-slate-950/80 px-3 py-3 text-left backdrop-blur-lg shadow-[0_24px_60px_-32px_rgba(56,189,248,0.55)] ${
+                    callout.align === "left" ? "text-right" : "text-left"
+                  }`}
+                  style={textStyle}
+                >
+                  <p className="text-[0.65rem] uppercase tracking-[0.3em] text-slate-200/90">
+                    {callout.title}
+                  </p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-slate-200">
+                    {callout.description}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+      </div>
+    </section>
+  );
+};
+
+
 const ScrollScrubPhysique = () => {
   const sectionRef = useRef<HTMLDivElement | null>(null);
+  const pinContainerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
-  const calloutRefs = useRef<HTMLDivElement[]>([]);
+  const calloutRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const callouts = [
     {
       title: "Body Fat",
       value: "8%",
       subtitle: "Stage-ready conditioning",
-      position: "left-4 top-[18%] md:left-16 md:top-[24%]",
+      position: "left-4 top-[15%] md:left-12 md:top-[55%]",
     },
     {
       title: "Lean Mass",
       value: "54%",
       subtitle: "Measured via DEXA",
-      position: "right-4 top-[38%] md:right-16 md:top-[32%]",
+      position: "right-4 top-[32%] md:right-12 md:top-[50%]",
     },
     {
       title: "PR Totals",
       value: "335 / 250 / 475",
       subtitle: "Squat · Bench · Deadlift",
-      position: "left-1/2 bottom-10 -translate-x-1/2 md:left-auto md:right-16",
+      position: "left-1/2 bottom-8 -translate-x-1/2 md:left-auto md:right-12",
     },
   ];
 
   useEffect(() => {
-    const section = sectionRef.current;
+    const pinContainer = pinContainerRef.current;
     const video = videoRef.current;
-    if (!section || !video) return;
+    if (!pinContainer || !video) return;
 
     gsap.registerPlugin(ScrollTrigger);
 
     let context: gsap.Context | undefined;
 
     const setupTimeline = () => {
-      if (prefersReducedMotion || !sectionRef.current || !videoRef.current) return undefined;
+      if (prefersReducedMotion || !pinContainerRef.current || !videoRef.current) return undefined;
 
       const videoEl = videoRef.current;
       videoEl.pause();
@@ -941,11 +1161,11 @@ const ScrollScrubPhysique = () => {
         const tl = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
-            trigger: sectionRef.current!,
+            trigger: pinContainerRef.current!,
             start: "top top",
             end: () => `+=${window.innerHeight * 3}`,
             scrub: true,
-            pin: true,
+            pin: pinContainerRef.current,
             anticipatePin: 1,
           },
         });
@@ -957,6 +1177,7 @@ const ScrollScrubPhysique = () => {
         );
 
         calloutRefs.current.forEach((el, index) => {
+          if (!el) return;
           const enterAt = 0.18 + index * 0.22;
           tl.fromTo(
             el,
@@ -966,11 +1187,11 @@ const ScrollScrubPhysique = () => {
           );
           tl.to(
             el,
-            { autoAlpha: 0, y: -36, duration: 0.3, ease: "power2.in" },
-            enterAt + 0.28
+            { autoAlpha: 0, y: -32, duration: 0.3, ease: "power2.in" },
+            enterAt + 0.3
           );
         });
-      }, sectionRef);
+      }, pinContainerRef);
 
       ScrollTrigger.refresh();
       return ctx;
@@ -1003,20 +1224,23 @@ const ScrollScrubPhysique = () => {
   }, [prefersReducedMotion]);
 
   return (
-    <section ref={sectionRef} className="relative isolate overflow-hidden bg-slate-950 py-24 sm:py-32">
+    <section ref={sectionRef} className="relative isolate overflow-hidden bg-slate-950 py-16 sm:py-20">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_480px_at_20%_20%,rgba(56,189,248,0.12),transparent_60%),radial-gradient(900px_480px_at_80%_80%,rgba(56,189,248,0.08),transparent_70%)]" />
-      <div className="relative mx-auto max-w-5xl px-3 sm:px-4 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.4em] text-teal-300/80">
+      <div className="relative mx-auto max-w-3xl px-3 text-center sm:px-4">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-teal-300/80">
           ScrollScrub Physique
         </p>
-        <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">Scroll through the physique journey</h2>
-        <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-400 sm:text-base">
-          Scrub the posing reel with your scroll wheel. Watch the physique come to life as key stats pulse into view.
+        <h2 className="mt-3 text-3xl font-semibold sm:text-[2.1rem]">Scroll the posing reel</h2>
+        <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
+          Glide through the routine and watch the metrics pulse in as you explore.
         </p>
       </div>
 
-      <div className="relative mx-auto mt-12 flex max-w-4xl flex-col items-center px-3 sm:px-4">
-        <div className="relative aspect-[9/16] w-full max-w-[540px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-black shadow-[0_40px_120px_-50px_rgba(34,211,238,0.45)]">
+      <div
+        ref={pinContainerRef}
+        className="relative mx-auto mt-10 flex max-w-4xl flex-col items-center px-3 sm:mt-12 sm:px-4"
+      >
+        <div className="relative aspect-[9/16] w-full max-w-[520px] overflow-hidden rounded-[2.4rem] border border-white/10 bg-black shadow-[0_36px_120px_-50px_rgba(34,211,238,0.45)]">
           <video
             ref={videoRef}
             src="/physique/website-video-1.mp4"
@@ -1026,30 +1250,32 @@ const ScrollScrubPhysique = () => {
             controls={prefersReducedMotion ?? false}
             className="h-full w-full object-cover"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/0 via-slate-950/10 to-slate-950/30" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/0 via-slate-950/8 to-slate-950/28" />
           {callouts.map((callout, idx) => (
             <div
               key={callout.title}
               ref={(el) => {
-                if (el) calloutRefs.current[idx] = el;
+                calloutRefs.current[idx] = el;
               }}
-              className={`pointer-events-none absolute w-[180px] rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left backdrop-blur-md shadow-[0_24px_60px_-30px_rgba(56,189,248,0.55)] ${callout.position} ${prefersReducedMotion ? "opacity-100" : "opacity-0"}`}
+              className={`pointer-events-none absolute w-[180px] rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left backdrop-blur-md shadow-[0_24px_60px_-32px_rgba(56,189,248,0.55)] ${callout.position} ${
+                prefersReducedMotion ? "opacity-100" : "opacity-0"
+              }`}
             >
-              <p className="text-xs uppercase tracking-[0.3em] text-teal-200/80">{callout.title}</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{callout.value}</p>
+              <p className="text-[0.6rem] uppercase tracking-[0.28em] text-teal-200/80">{callout.title}</p>
+              <p className="mt-1.5 text-2xl font-semibold text-white">{callout.value}</p>
               <p className="mt-1 text-xs text-slate-300">{callout.subtitle}</p>
             </div>
           ))}
         </div>
         {!prefersReducedMotion && (
-          <p className="mt-6 flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-400/80">
-            <span className="h-px w-8 bg-slate-600/60" />
+          <p className="mt-5 flex items-center gap-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400/80">
+            <span className="h-px w-6 bg-slate-600/60" />
             Scroll to scrub
-            <span className="h-px w-8 bg-slate-600/60" />
+            <span className="h-px w-6 bg-slate-600/60" />
           </p>
         )}
         {prefersReducedMotion && (
-          <p className="mt-6 text-xs text-slate-400">
+          <p className="mt-5 text-xs text-slate-400">
             Motion reduced — use the transport controls to explore the reel.
           </p>
         )}
