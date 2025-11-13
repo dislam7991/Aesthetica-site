@@ -35,6 +35,8 @@ const scrollToId = (id: string) => {
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
+const TRANSITION_CLASS = "transition-all duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)]";
+
 /*************************************************
  * SMALL, REUSABLE UI BITS (unstyled -> Tailwind only)
  *************************************************/
@@ -45,7 +47,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 function Button({ variant = "solid", size = "md", className = "", ...props }: ButtonProps) {
   const base =
-    "inline-flex items-center justify-center rounded-full font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
+    `${TRANSITION_CLASS} inline-flex items-center justify-center rounded-full font-medium focus:outline-none focus:ring-2 focus:ring-offset-2`;
   const sizes = {
     sm: "h-9 px-4 text-sm",
     md: "h-10 px-5 text-sm",
@@ -76,7 +78,7 @@ function AnchorButton({
   className?: string;
 } & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   const base =
-    "inline-flex items-center justify-center rounded-full font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
+    `${TRANSITION_CLASS} inline-flex items-center justify-center rounded-full font-medium focus:outline-none focus:ring-2 focus:ring-offset-2`;
   const sizes = {
     sm: "h-9 px-4 text-sm",
     md: "h-10 px-5 text-sm",
@@ -113,7 +115,7 @@ const Feature = ({ children }: { children: React.ReactNode }) => (
  * BASIC CARD & FORM INPUTS (Tailwind only)
  *************************************************/
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-2xl border border-white/10 bg-slate-900/60 ${className}`}>{children}</div>;
+  return <div className={`${TRANSITION_CLASS} rounded-2xl border border-white/10 bg-slate-900/60 ${className}`}>{children}</div>;
 }
 function CardHeader({ children }: { children: React.ReactNode }) {
   return <div className="p-5">{children}</div>;
@@ -165,7 +167,7 @@ type ProgramCardProps = {
   checkoutUrl: string;
 };
 const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checkoutUrl }: ProgramCardProps) => (
-  <Card className="group relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-xl">
+  <Card className="group relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-xl hover:-translate-y-2 hover:border-white/20 hover:shadow-[0_28px_52px_-28px_rgba(56,189,248,0.55)]">
     <div className="pointer-events-none absolute inset-0 opacity-40 [background:radial-gradient(1200px_500px_at_80%_-20%,rgba(59,130,246,.3),transparent_60%)]" />
     <CardHeader>
       <div className="mb-2">
@@ -519,7 +521,10 @@ export default function AestheticaFitnessCoaching() {
             { name: "Jasmine", quote: "Finally built glutes without killing my knees.", stat: "+2" },
             { name: "Duncan", quote: "Busy schedule, lost 10 lb while getting abs and keeping strength", stat: "-10 lb" },
           ].map((t, i) => (
-            <Card key={i}>
+            <Card
+              key={i}
+              className="hover:-translate-y-1.5 hover:border-white/20 hover:bg-slate-900/80 hover:shadow-[0_20px_40px_-28px_rgba(56,189,248,0.45)]"
+            >
               <CardHeader>
                 <CardTitle className="text-lg">{t.name}</CardTitle>
                 <p className="text-sm text-slate-300">{t.stat}</p>
@@ -703,7 +708,7 @@ function SellingPoint({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
+    <div className={`${TRANSITION_CLASS} rounded-3xl border border-white/10 bg-slate-900/60 p-6 hover:-translate-y-2 hover:border-white/20 hover:bg-slate-900/80 hover:shadow-[0_24px_48px_-28px_rgba(56,189,248,0.45)]`}>
       <div className="mb-3 flex items-center gap-3">
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-teal-400/20">
           <Icon className="h-5 w-5 text-teal-200" />
