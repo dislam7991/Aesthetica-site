@@ -451,6 +451,21 @@ export default function AestheticaFitnessCoaching() {
 
   return (
     <main className="min-h-screen scroll-smooth bg-slate-950 text-slate-100">
+      {/* Scroll progress bar */}
+      <div aria-hidden className="pointer-events-none fixed left-0 top-0 z-[70] h-[3px] w-full">
+        {/* optional subtle track: bg-white/5 */}
+        <div className="h-full w-full bg-white/5"></div>
+        <div
+          className="
+            absolute left-0 top-0 h-full rounded-r-full
+            bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300
+            shadow-[0_0_10px_2px_rgba(34,211,238,0.35)]
+            transition-[width] duration-200 ease-out motion-reduce:transition-none
+          "
+          style={{ width: `${Math.round(scrollProgress * 100)}%` }}
+        />
+      </div>
+
       {/* background glow */}
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(800px_400px_at_20%_-10%,rgba(59,130,246,.35),transparent),radial-gradient(600px_300px_at_80%_-10%,rgba(16,185,129,.25),transparent)]" />
 
@@ -751,13 +766,18 @@ export default function AestheticaFitnessCoaching() {
           ].map((img) => (
             <figure
               key={img.src}
-              className="group relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/10"
+              className="
+                group relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/10
+                transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
+                will-change-transform hover:-translate-y-1
+                motion-reduce:transition-none motion-reduce:transform-none
+              "
             >
               <Image
                 src={img.src}
                 alt={img.alt}
                 fill
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                className="object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 360px"
               />
               <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent p-2 text-xs text-white/80">
@@ -934,7 +954,14 @@ function SellingPoint({
 
 function FAQ({ q, a }: { q: string; a: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+    <div
+      className="
+        rounded-2xl border border-white/10 bg-slate-900/60 p-5
+        transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
+        will-change-transform hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(34,211,238,0.12)]
+        motion-reduce:transition-none motion-reduce:transform-none
+      "
+    >
       <p className="font-medium">{q}</p>
       <p className="mt-2 text-sm text-slate-300">{a}</p>
     </div>
