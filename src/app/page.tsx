@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import {
   Dumbbell,
@@ -9,12 +9,15 @@ import {
   Shield,
   Timer,
   CheckCircle2,
-  ArrowRight,
+  ArrowRight, 
   Mail,
   Phone,
   Calendar,
   ChevronDown,
 } from "lucide-react";
+import { motion, useReducedMotion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 /*************************************************
  * COMMERCE / SCHEDULING CONFIG
@@ -35,6 +38,116 @@ const scrollToId = (id: string) => {
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 };
 
+const TRANSITION_CLASS = "transition-all duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)]";
+const MOTION_EASE: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 28, filter: "blur(10px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)" },
+};
+const heroImageVariant = {
+  hidden: { opacity: 0, y: 32, scale: 0.96 },
+  visible: { opacity: 1, y: 0, scale: 1 },
+};
+const staggerContainer = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.18, delayChildren: 0.08 },
+  },
+};
+const MAGNETIC_SPRING = { stiffness: 320, damping: 26, mass: 0.7 };
+
+type PhysiqueCallout = {
+  title: string;
+  description: string;
+  anchor: { x: number; y: number };
+  text: { x: number; y: number };
+  points: { x: number; y: number }[];
+  align: "left" | "right";
+};
+
+const PHYSIQUE_CALLOUTS: PhysiqueCallout[] = [
+  {
+    title: "Wide 3D Delts",
+    description: "Capped shoulders and rear delt density for the 3D look",
+    anchor: { x: 68, y: 45 },
+    text: { x: 78, y: 35 },
+    points: [
+      { x: 68, y: 45 },
+      { x: 72, y: 18 },
+      { x: 86, y: 16 },
+    ],
+    align: "right",
+  },
+  {
+    title: "Chest Density + Fullness",
+    description: "Upper chest mass with full sternal thickness",
+    anchor: { x: 42, y: 52 },
+    text: { x: 18, y: 46 },
+    points: [
+      { x: 52, y: 32 },
+      { x: 34, y: 32 },
+      { x: 18, y: 26 },
+    ],
+    align: "left",
+  },
+  {
+    title: "Jacked, Vascular Arms",
+    description: "Thick biceps, triceps, and forearm detail",
+    anchor: { x: 32, y: 65 },
+    text: { x: 20, y: 67 },
+    points: [
+      { x: 72, y: 67 },
+      { x: 74, y: 43 },
+      { x: 84, y: 44 },
+    ],
+    align: "left",
+  },
+  {
+    title: "Sculpted V-Taper",
+    description: "Lat sweep into  tight waist for the classic X-frame",
+    anchor: { x: 62, y: 74 },
+    text: { x: 81, y: 80 },
+    points: [
+      { x: 50, y: 58 },
+      { x: 32, y: 60 },
+      { x: 18, y: 68 },
+    ],
+    align: "right",
+  },
+];
+
+
+function useMagnetic<T extends HTMLElement>(active: boolean) {
+  const ref = useRef<T | null>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, MAGNETIC_SPRING);
+  const springY = useSpring(y, MAGNETIC_SPRING);
+  const innerX = useTransform(springX, (value) => value * 0.1);
+  const innerY = useTransform(springY, (value) => value * 0.1);
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      if (!active || !ref.current) return;
+
+      const rect = ref.current.getBoundingClientRect();
+      const offsetX = event.clientX - (rect.left + rect.width / 2);
+      const offsetY = event.clientY - (rect.top + rect.height / 2);
+
+      x.set(offsetX * 0.04);
+      y.set(offsetY * 0.04);
+    },
+    [active, x, y]
+  );
+
+  const handlePointerLeave = useCallback(() => {
+    x.set(0);
+    y.set(0);
+  }, [x, y]);
+
+  return { ref, x: springX, y: springY, innerX, innerY, handlePointerMove, handlePointerLeave };
+}
+
 /*************************************************
  * SMALL, REUSABLE UI BITS (unstyled -> Tailwind only)
  *************************************************/
@@ -42,10 +155,24 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   asChild?: false;
   variant?: "solid" | "outline";
   size?: "sm" | "md" | "lg";
+  magnetic?: boolean;
 };
-function Button({ variant = "solid", size = "md", className = "", ...props }: ButtonProps) {
+function Button({
+  variant = "solid",
+  size = "md",
+  className = "",
+  magnetic = false,
+  children,
+  style,
+  onPointerMove,
+  onPointerLeave,
+  ...props
+}: ButtonProps) {
+  const prefersReducedMotion = useReducedMotion();
+  const active = magnetic && !prefersReducedMotion;
+  const { ref, x, y, innerX, innerY, handlePointerMove, handlePointerLeave } = useMagnetic<HTMLButtonElement>(active);
   const base =
-    "inline-flex items-center justify-center rounded-full font-medium transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus:outline-none focus:ring-2 focus:ring-offset-2";
+    `${TRANSITION_CLASS} inline-flex items-center justify-center rounded-full font-medium focus:outline-none focus:ring-2 focus:ring-offset-2`;
   const sizes = {
     sm: "h-9 px-4 text-sm",
     md: "h-10 px-5 text-sm",
@@ -58,7 +185,38 @@ function Button({ variant = "solid", size = "md", className = "", ...props }: Bu
       "border border-black/15 bg-white text-black hover:text-blue-600 dark:border-white/20 dark:bg-transparent dark:text-white",
   }[variant];
 
-  return <button className={`${base} ${sizes} ${variants} ${className}`} {...props} />;
+  const motionStyle = active ? ({ ...(style ?? {}), x, y } as any) : style;
+  const contentClass = "relative inline-flex items-center gap-2";
+  const content = active ? (
+    <motion.span style={{ x: innerX, y: innerY }} className={contentClass}>
+      {children}
+    </motion.span>
+  ) : (
+    <span className={contentClass}>{children}</span>
+  );
+
+  const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, onAnimationIteration, ...motionProps } = props;
+
+  return (
+    <motion.button
+      ref={ref}
+      className={`${base} ${sizes} ${variants} ${className} ${active ? "relative overflow-hidden" : ""}`}
+      style={motionStyle}
+      onPointerMove={(event) => {
+        if (active) handlePointerMove(event);
+        onPointerMove?.(event);
+      }}
+      onPointerLeave={(event) => {
+        if (active) handlePointerLeave();
+        onPointerLeave?.(event);
+      }}
+      whileHover={active ? { scale: 1.02 } : undefined}
+      whileTap={active ? { scale: 0.98 } : undefined}
+      {...motionProps}
+    >
+      {content}
+    </motion.button>
+  );
 }
 
 function AnchorButton({
@@ -67,6 +225,10 @@ function AnchorButton({
   variant = "solid",
   size = "md",
   className = "",
+  magnetic = false,
+  style,
+  onPointerMove,
+  onPointerLeave,
   ...rest
 }: {
   href: string;
@@ -74,9 +236,13 @@ function AnchorButton({
   variant?: "solid" | "outline";
   size?: "sm" | "md" | "lg";
   className?: string;
+  magnetic?: boolean;
 } & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
+  const prefersReducedMotion = useReducedMotion();
+  const active = magnetic && !prefersReducedMotion;
+  const { ref, x, y, innerX, innerY, handlePointerMove, handlePointerLeave } = useMagnetic<HTMLAnchorElement>(active);
   const base =
-    "inline-flex items-center justify-center rounded-full font-medium transition-colors duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus:outline-none focus:ring-2 focus:ring-offset-2";
+    `${TRANSITION_CLASS} inline-flex items-center justify-center rounded-full font-medium focus:outline-none focus:ring-2 focus:ring-offset-2`;
   const sizes = {
     sm: "h-9 px-4 text-sm",
     md: "h-10 px-5 text-sm",
@@ -89,10 +255,35 @@ function AnchorButton({
       "border border-black/15 bg-white text-black hover:text-blue-600 dark:border-white/20 dark:bg-transparent dark:text-white",
   }[variant];
 
+  // Filter out HTML drag events and animation events that conflict with Framer Motion
+  const { onDrag, onDragStart, onDragEnd, onDragOver, onDragEnter, onDragLeave, onDrop, onAnimationStart, onAnimationEnd, onAnimationIteration, ...motionProps } = rest;
+
   return (
-    <a href={href} className={`${base} ${sizes} ${variants} ${className}`} {...rest}>
-      {children}
-    </a>
+    <motion.a
+      ref={ref}
+      href={href}
+      className={`${base} ${sizes} ${variants} ${className} ${active ? "relative overflow-hidden" : ""}`}
+      style={active ? ({ ...(style ?? {}), x, y } as any) : style}
+      onPointerMove={(event) => {
+        if (active) handlePointerMove(event);
+        onPointerMove?.(event);
+      }}
+      onPointerLeave={(event) => {
+        if (active) handlePointerLeave();
+        onPointerLeave?.(event);
+      }}
+      whileHover={active ? { scale: 1.015 } : undefined}
+      whileTap={active ? { scale: 0.985 } : undefined}
+      {...motionProps}
+    >
+      {active ? (
+        <motion.span style={{ x: innerX, y: innerY }} className="relative inline-flex items-center gap-2">
+          {children}
+        </motion.span>
+      ) : (
+        <span className="relative inline-flex items-center gap-2">{children}</span>
+      )}
+    </motion.a>
   );
 }
 
@@ -113,20 +304,7 @@ const Feature = ({ children }: { children: React.ReactNode }) => (
  * BASIC CARD & FORM INPUTS (Tailwind only)
  *************************************************/
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div
-      className={`
-        rounded-2xl border border-white/10 bg-slate-900/60
-        transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
-        will-change-transform
-        hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(34,211,238,0.15)]
-        motion-reduce:transition-none motion-reduce:transform-none
-        ${className}
-      `}
-    >
-      {children}
-    </div>
-  );
+  return <div className={`${TRANSITION_CLASS} rounded-2xl border border-white/10 bg-slate-900/60 ${className}`}>{children}</div>;
 }
 function CardHeader({ children }: { children: React.ReactNode }) {
   return <div className="p-5">{children}</div>;
@@ -176,49 +354,62 @@ type ProgramCardProps = {
   bullets: string[];
   label: string;
   checkoutUrl: string;
-  badge?: string; // e.g., "Most Popular"
+  badge?: string;
 };
-const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checkoutUrl, badge }: ProgramCardProps) => (
-  <Card className="group relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-xl">
-    {badge && (
-      <div className="absolute right-3 top-3 z-20">
-        <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 px-2.5 py-1 text-[11px] font-semibold text-white shadow-md ring-1 ring-white/20">
-          <Sparkles className="h-3.5 w-3.5" />
-          {badge}
-        </span>
-      </div>
-    )}
-    <div className="pointer-events-none absolute inset-0 opacity-40 [background:radial-gradient(1200px_500px_at_80%_-20%,rgba(59,130,246,.3),transparent_60%)]" />
-    <CardHeader>
-      <div className="mb-2">
-        <span className="inline-flex items-center rounded-full bg-blue-500/10 px-3 py-1 text-xs text-blue-200">
-          {label}
-        </span>
-      </div>
-      <CardTitle className="flex items-center gap-3 text-2xl">
-        <Icon className="h-7 w-7" />
-        <span>{title}</span>
-      </CardTitle>
-      <p className="mt-1 text-sm text-slate-300">{tagline}</p>
-    </CardHeader>
-    <CardContent className="space-y-3">
-      <div className="text-3xl font-semibold">
-        ${price}
-        <span className="ml-1 text-base font-normal text-slate-300"> one-time</span>
-      </div>
-      <div className="space-y-2">
-        {bullets.map((b, i) => (
-          <Feature key={i}>{b}</Feature>
-        ))}
-      </div>
-    </CardContent>
-    <CardFooter>
-      <AnchorButton href={checkoutUrl} target="_blank" rel="noreferrer" size="lg" className="w-full">
-        Get Program <ArrowRight className="ml-2 h-4 w-4" />
-      </AnchorButton>
-    </CardFooter>
-  </Card>
-);
+const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checkoutUrl, badge }: ProgramCardProps) => {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className="group relative"
+      initial={prefersReducedMotion ? undefined : "hidden"}
+      whileInView={prefersReducedMotion ? undefined : "visible"}
+      viewport={{ once: true, amount: 0.35 }}
+      variants={prefersReducedMotion ? undefined : fadeUpVariant}
+      transition={{ duration: 0.6, ease: MOTION_EASE }}
+      whileHover={prefersReducedMotion ? undefined : { y: -12, scale: 1.01 }}
+      whileTap={prefersReducedMotion ? undefined : { y: -4 }}
+    >
+      <Card className="relative overflow-visible bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-xl hover:border-white/20 hover:shadow-[0_28px_52px_-28px_rgba(56,189,248,0.55)]">
+        <div className="pointer-events-none absolute inset-0 opacity-40 [background:radial-gradient(1200px_500px_at_80%_-20%,rgba(59,130,246,.3),transparent_60%)]" />
+        {badge && (
+          <span className="pointer-events-none absolute left-1/2 top-0 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-gradient-to-r from-sky-400/25 via-cyan-300/25 to-teal-300/25 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-teal-100 shadow-[0_18px_45px_-18px_rgba(34,211,238,0.6)] backdrop-blur-md">
+            <Sparkles className="h-4 w-4 text-teal-100" />
+            {badge}
+          </span>
+        )}
+        <CardHeader>
+          <div className="mb-2">
+            <span className="inline-flex items-center rounded-full bg-blue-500/10 px-3 py-1 text-xs text-blue-200">
+              {label}
+            </span>
+          </div>
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <Icon className="h-7 w-7" />
+            <span>{title}</span>
+          </CardTitle>
+          <p className="mt-1 text-sm text-slate-300">{tagline}</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="text-3xl font-semibold">
+            ${price}
+            <span className="ml-1 text-base font-normal text-slate-300"> one-time</span>
+          </div>
+          <div className="space-y-2">
+            {bullets.map((b, i) => (
+              <Feature key={i}>{b}</Feature>
+            ))}
+          </div>
+        </CardContent>
+        <CardFooter>
+          <AnchorButton magnetic href={checkoutUrl} target="_blank" rel="noreferrer" size="lg" className="w-full">
+            Get Program <ArrowRight className="ml-2 h-4 w-4" />
+          </AnchorButton>
+        </CardFooter>
+      </Card>
+    </motion.div>
+  );
+};
 
 /*************************************************
  * PAGE
@@ -228,32 +419,18 @@ export default function AestheticaFitnessCoaching() {
   const [submitting, setSubmitting] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // Scroll progress (0..1), throttled via requestAnimationFrame
+  const prefersReducedMotion = useReducedMotion();
+
   useEffect(() => {
-    const el = document.documentElement;
-    const getMax = () => Math.max(1, el.scrollHeight - window.innerHeight);
-    const compute = () => {
-      const max = getMax();
-      const y = Math.min(Math.max(window.scrollY, 0), max);
-      setScrollProgress(y / max);
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      const max = scrollHeight - clientHeight;
+      setScrollProgress(max > 0 ? (scrollTop / max) * 100 : 0);
     };
-    let ticking = false;
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(() => {
-          compute();
-          ticking = false;
-        });
-      }
-    };
-    compute();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", compute);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", compute);
-    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -327,8 +504,16 @@ export default function AestheticaFitnessCoaching() {
 <section className="relative isolate">
   {/* Hero band: holds content + background; background stops at the end of this block */}
   <div className="relative min-h-[420px] sm:min-h-[520px]">
-    <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 sm:gap-10 px-3 sm:px-4 pb-12 sm:pb-20 pt-12 sm:pt-16 md:grid-cols-2 md:pb-28 md:pt-24">
-      <div>
+    <motion.div
+      className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-6 sm:gap-10 px-3 sm:px-4 pb-12 sm:pb-20 pt-12 sm:pt-16 md:grid-cols-2 md:pb-28 md:pt-24"
+      initial={prefersReducedMotion ? undefined : "hidden"}
+      animate={prefersReducedMotion ? undefined : "visible"}
+      variants={prefersReducedMotion ? undefined : staggerContainer}
+    >
+      <motion.div
+        variants={prefersReducedMotion ? undefined : fadeUpVariant}
+        transition={{ duration: 0.7, ease: MOTION_EASE }}
+      >
         <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-2">
           <Pill>Strength in Form</Pill>
           <Pill>Muscle • Performance • Longevity</Pill>
@@ -347,10 +532,11 @@ export default function AestheticaFitnessCoaching() {
         </p>
 
         <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row flex-wrap gap-3">
-          <Button size="lg" className="bg-blue-600 w-full sm:w-auto" onClick={() => scrollToId("programs")}>
+          <Button magnetic size="lg" className="bg-blue-600 w-full sm:w-auto" onClick={() => scrollToId("programs")}>
             Browse Programs
           </Button>
           <Button
+            magnetic
             size="lg"
             variant="outline"
             className="bg-white text-black hover:text-blue-600 w-full sm:w-auto"
@@ -365,9 +551,13 @@ export default function AestheticaFitnessCoaching() {
           <div className="flex items-center gap-2"><Timer className="h-4 w-4" /> Busy-life friendly</div>
           <div className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Sustainable results</div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="relative mt-8 md:mt-0">
+      <motion.div
+        className="relative mt-8 md:mt-0"
+        variants={prefersReducedMotion ? undefined : heroImageVariant}
+        transition={{ duration: 0.8, ease: MOTION_EASE }}
+      >
         <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 blur-2xl" />
         <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 sm:p-6 shadow-2xl">
           <div className="grid grid-cols-3 gap-2 sm:gap-4">
@@ -383,55 +573,26 @@ export default function AestheticaFitnessCoaching() {
             ))}
           </div>
         </div>
-      </div>
-    </div>
-
-    {/* Subtle hero background image (limited to the hero band above) */}
-    <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
-      <Image
-        src="/physique/bg-hero.jpg"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover opacity-30 blur-[1px]"
-        style={{ objectPosition: "30% center" }} // bias to the right
-      />
-    </div>
+      </motion.div>
+    </motion.div>
   </div>
 
-  {/* Enhanced selling points with mobile spacing (no background behind this) */}
-  <div className="mx-auto max-w-6xl px-3 sm:px-4">
-    <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-3">
-      <SellingPoint icon={Dumbbell} title="Intelligent Training">
-        Periodized plans that progress week-to-week without wrecking your joints.
-      </SellingPoint>
-      <SellingPoint icon={Flame} title="Nutrition That Works">
-        Simple, high-protein frameworks for busy lifters. No starvation games.
-      </SellingPoint>
-      <SellingPoint icon={Sparkles} title="Accountability & Habits">
-        Systems that keep you consistent when motivation dips.
-      </SellingPoint>
-    </div>
+  {/* Subtle hero background image (limited to the hero band above) */}
+  <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+    <Image
+      src="/physique/bg-hero.jpg"
+      alt=""
+      fill
+      priority
+      sizes="100vw"
+      className="object-cover opacity-30 blur-[1px]"
+      style={{ objectPosition: "30% 17%" }} // bias to the right
+    />
   </div>
 </section>
 
-      {/* FEATURED IMAGE (high visibility) */}
-      <section className="mx-auto max-w-6xl px-3 sm:px-4 pt-6 sm:pt-10">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10">
-          <Image
-            src="/physique/hero-wide.jpg"
-            alt="Physique highlight"
-            width={1600}
-            height={900}
-            priority
-            className="h-auto w-full object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
-          />
-          {/* Gentle gradient for legibility */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
-        </div>
-      </section>
+      {/* PHYSIQUE ANATOMY SCROLLYTELLING */}
+      <PhysiqueCalloutShowcase />
 
       {/* PROGRAMS */}
       <section id="programs" className="mx-auto max-w-6xl px-4 py-20">
@@ -528,7 +689,7 @@ export default function AestheticaFitnessCoaching() {
               <Feature>Messaging access for quick form checks & adjustments</Feature>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button className="bg-blue-600" onClick={() => scrollToId("consult")}>
+              <Button magnetic className="bg-blue-600" onClick={() => scrollToId("consult")}>
                 Book Consultation
               </Button>
               <Button
@@ -573,7 +734,10 @@ export default function AestheticaFitnessCoaching() {
             { name: "Jasmine", quote: "Finally built glutes without killing my knees.", stat: "+2" },
             { name: "Duncan", quote: "Busy schedule, lost 10 lb while getting abs and keeping strength", stat: "-10 lb" },
           ].map((t, i) => (
-            <Card key={i}>
+            <Card
+              key={i}
+              className="hover:-translate-y-1.5 hover:border-white/20 hover:bg-slate-900/80 hover:shadow-[0_20px_40px_-28px_rgba(56,189,248,0.45)]"
+            >
               <CardHeader>
                 <CardTitle className="text-lg">{t.name}</CardTitle>
                 <p className="text-sm text-slate-300">{t.stat}</p>
@@ -624,6 +788,9 @@ export default function AestheticaFitnessCoaching() {
         </div>
       </section>
       
+      {/* SCROLL SCRUB PHYSIQUE */}
+      <ScrollScrubPhysique />
+
       {/* FAQ */}
       <section id="faq" className="mx-auto max-w-6xl px-4 py-20">
         <h2 className="text-3xl font-bold md:text-4xl">FAQ</h2>
@@ -704,13 +871,13 @@ export default function AestheticaFitnessCoaching() {
             </div>
 
             <div className="pt-2">
-              <Button disabled={submitting} size="lg" className="w-full bg-blue-600">
+              <Button magnetic disabled={submitting} size="lg" className="w-full bg-blue-600">
                 {submitting ? "Sending…" : "Request Consultation"}
               </Button>
             </div>
 
             <div className="pt-3">
-              <AnchorButton href={CALENDLY} target="_blank" rel="noreferrer" variant="outline" className="w-full">
+              <AnchorButton magnetic href={CALENDLY} target="_blank" rel="noreferrer" variant="outline" className="w-full">
                 Or schedule instantly on Calendly
               </AnchorButton>
             </div>
@@ -729,6 +896,13 @@ export default function AestheticaFitnessCoaching() {
           </div>
         </div>
       </footer>
+
+      <div className="fixed inset-x-0 top-0 z-50 h-1 bg-cyan-900/20">
+        <div
+          className="h-full bg-gradient-to-r from-sky-400 via-teal-400 to-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.55)] transition-[width] duration-150 ease-out"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
     </main>
   );
 }
@@ -754,14 +928,18 @@ function SellingPoint({
   title: string;
   children: React.ReactNode;
 }) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
-    <div
-      className="
-        rounded-3xl border border-white/10 bg-slate-900/60 p-6
-        transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
-        will-change-transform hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(34,211,238,0.12)]
-        motion-reduce:transition-none motion-reduce:transform-none
-      "
+    <motion.div
+      className={`${TRANSITION_CLASS} rounded-3xl border border-white/10 bg-slate-900/60 p-6 hover:border-white/20 hover:bg-slate-900/80 hover:shadow-[0_24px_48px_-28px_rgba(56,189,248,0.45)]`}
+      initial={prefersReducedMotion ? undefined : "hidden"}
+      whileInView={prefersReducedMotion ? undefined : "visible"}
+      viewport={{ once: true, amount: 0.3 }}
+      variants={prefersReducedMotion ? undefined : fadeUpVariant}
+      transition={{ duration: 0.55, ease: MOTION_EASE }}
+      whileHover={prefersReducedMotion ? undefined : { y: -10, scale: 1.01 }}
+      whileTap={prefersReducedMotion ? undefined : { y: -4 }}
     >
       <div className="mb-3 flex items-center gap-3">
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-teal-400/20">
@@ -770,7 +948,7 @@ function SellingPoint({
         <h3 className="text-lg font-semibold">{title}</h3>
       </div>
       <p className="text-sm text-slate-300">{children}</p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -789,3 +967,346 @@ function FAQ({ q, a }: { q: string; a: string }) {
     </div>
   );
 }
+
+const PhysiqueCalloutShowcase = () => {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const pinnedRef = useRef<HTMLDivElement | null>(null);
+  const calloutRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const prefersReducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    calloutRefs.current = calloutRefs.current.slice(0, PHYSIQUE_CALLOUTS.length);
+
+    const pinned = pinnedRef.current;
+    if (!pinned) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    if (prefersReducedMotion) {
+      calloutRefs.current.forEach((node) => {
+        if (node) gsap.set(node, { autoAlpha: 1, y: 0 });
+      });
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      const timeline = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: {
+          trigger: pinned,                          // 🔥 trigger on the image container itself
+          start: "top top",                         // pin when the *image* hits the top of the viewport
+          end: () => `+=${window.innerHeight * 2.4}`,
+          scrub: true,
+          pin: pinned,
+          pinSpacing: true,
+        },
+      });
+
+      // (optional) small lead-in so nothing happens for the first bit of scroll
+      timeline.to({}, { duration: 0.12 });
+
+      calloutRefs.current.forEach((element, index) => {
+        if (!element) return;
+        const enterAt = 0.15 + index * 0.35;
+
+        timeline.fromTo(
+          element,
+          { autoAlpha: 0, y: 24 },
+          { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" },
+          enterAt
+        );
+        timeline.to(
+          element,
+          { autoAlpha: 0, y: -20, duration: 0.35, ease: "power2.in" },
+          enterAt + 0.32
+        );
+      });
+
+      timeline.to({}, { duration: 0.3 });
+
+      ScrollTrigger.refresh();
+    }, pinned);
+
+    return () => ctx.revert();
+  }, [prefersReducedMotion]);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="mx-auto max-w-6xl px-3 sm:px-4 pt-6 sm:pt-10 pb-16 sm:pb-20"
+    >
+      <div className="mx-auto max-w-3xl text-center">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-teal-300/80">
+          Anatomy Highlight
+        </p>
+        <h2 className="mt-3 text-3xl font-semibold sm:text-[2.1rem]">
+          Dialed-in proportions, showcased
+        </h2>
+        <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-400">
+          Scroll to dissect the optimal aesthetic physique; each region lights up with the method behind the muscle.
+        </p>
+      </div>
+
+      <div
+        ref={pinnedRef}
+        className="relative mx-auto mt-6 sm:mt-8 w-full overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-[0_40px_160px_-70px_rgba(34,211,238,0.45)]"
+      >
+        <Image
+          src="/physique/hero-wide.jpg"
+          alt="Full physique spotlight"
+          width={1600}
+          height={900}
+          priority
+          className="h-auto w-full object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
+        />
+        {/* same gradient feel as original featured image */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
+
+          {PHYSIQUE_CALLOUTS.map((callout, index) => {
+            // Build arrow geometry:
+            // 1. Start at the text box edge (horizontal),
+            // 2. Go horizontal,
+            // 3. Then angle into the anchor.
+            const textX = callout.text.x;
+            const textY = callout.text.y;
+
+            // start slightly outside the text box, on its midline
+            const startX = callout.align === "left" ? textX + 1 : textX - 1;
+            const startY = textY;
+
+            // mid point: horizontal line halfway toward the anchor
+            const midX = (startX + callout.anchor.x) / 2;
+            const midY = startY;
+
+            // end: the actual anchor on your physique
+            const endX = callout.anchor.x;
+            const endY = callout.anchor.y;
+
+            const points = `${startX},${startY} ${midX},${midY} ${endX},${endY}`;
+
+            const textStyle: React.CSSProperties = {
+              top: `${callout.text.y}%`,
+              left: `${callout.text.x}%`,
+              transform: `translate(${callout.align === "left" ? "-100%" : "0"}, -50%)`,
+            };
+
+            return (
+              <div
+                key={callout.title}
+                ref={(el) => {
+                  calloutRefs.current[index] = el;
+                }}
+                className="pointer-events-none absolute inset-0 opacity-0"
+              >
+                {/* White, thin, horizontal-then-angled arrow with a ball at the physique point */}
+                <svg
+                  className="absolute inset-0 h-full w-full"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
+                  {/* ball where it hits the muscle */}
+                  <circle cx={endX} cy={endY} r="0.9" fill="white" />
+
+                  <polyline
+                    points={points}
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="0.3"          // thinner line
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+
+                <div
+                  className={`absolute max-w-[190px] rounded-2xl border border-white/15 bg-slate-950/80 px-3 py-3 text-left backdrop-blur-lg shadow-[0_24px_60px_-32px_rgba(56,189,248,0.55)] ${
+                    callout.align === "left" ? "text-right" : "text-left"
+                  }`}
+                  style={textStyle}
+                >
+                  <p className="text-[0.65rem] uppercase tracking-[0.3em] text-slate-200/90">
+                    {callout.title}
+                  </p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-slate-200">
+                    {callout.description}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+      </div>
+    </section>
+  );
+};
+
+
+const ScrollScrubPhysique = () => {
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const pinContainerRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const calloutRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const callouts = [
+    {
+      title: "Body Fat",
+      value: "8%",
+      subtitle: "Stage-ready conditioning",
+      position: "left-4 top-[15%] md:left-12 md:top-[55%]",
+    },
+    {
+      title: "Lean Mass",
+      value: "54%",
+      subtitle: "Measured via DEXA",
+      position: "right-4 top-[32%] md:right-12 md:top-[50%]",
+    },
+    {
+      title: "PR Totals",
+      value: "335 / 250 / 475",
+      subtitle: "Squat · Bench · Deadlift",
+      position: "left-1/2 bottom-8 -translate-x-1/2 md:left-auto md:right-12",
+    },
+  ];
+
+  useEffect(() => {
+    const pinContainer = pinContainerRef.current;
+    const video = videoRef.current;
+    if (!pinContainer || !video) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    let context: gsap.Context | undefined;
+
+    const setupTimeline = () => {
+      if (prefersReducedMotion || !pinContainerRef.current || !videoRef.current) return undefined;
+
+      const videoEl = videoRef.current;
+      videoEl.pause();
+      videoEl.currentTime = 0;
+
+      const ctx = gsap.context(() => {
+        const tl = gsap.timeline({
+          defaults: { ease: "none" },
+          scrollTrigger: {
+            trigger: pinContainerRef.current!,
+            start: "top top",
+            end: () => `+=${window.innerHeight * 3}`,
+            scrub: true,
+            pin: pinContainerRef.current,
+            anticipatePin: 1,
+          },
+        });
+
+        tl.fromTo(
+          videoEl,
+          { currentTime: 0 },
+          { currentTime: videoEl.duration || 1, duration: 1 }
+        );
+
+        calloutRefs.current.forEach((el, index) => {
+          if (!el) return;
+          const enterAt = 0.18 + index * 0.22;
+          tl.fromTo(
+            el,
+            { autoAlpha: 0, y: 40 },
+            { autoAlpha: 1, y: 0, duration: 0.35, ease: "power3.out" },
+            enterAt
+          );
+          tl.to(
+            el,
+            { autoAlpha: 0, y: -32, duration: 0.3, ease: "power2.in" },
+            enterAt + 0.3
+          );
+        });
+      }, pinContainerRef);
+
+      ScrollTrigger.refresh();
+      return ctx;
+    };
+
+    const handleLoaded = () => {
+      context?.revert();
+      context = setupTimeline();
+    };
+
+    if (video.readyState >= 1) {
+      handleLoaded();
+    } else {
+      video.addEventListener("loadedmetadata", handleLoaded);
+    }
+
+    return () => {
+      video.removeEventListener("loadedmetadata", handleLoaded);
+      context?.revert();
+    };
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!prefersReducedMotion) return;
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+    }
+  }, [prefersReducedMotion]);
+
+  return (
+    <section ref={sectionRef} className="relative isolate overflow-hidden bg-slate-950 py-16 sm:py-20">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_480px_at_20%_20%,rgba(56,189,248,0.12),transparent_60%),radial-gradient(900px_480px_at_80%_80%,rgba(56,189,248,0.08),transparent_70%)]" />
+      <div className="relative mx-auto max-w-3xl px-3 text-center sm:px-4">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-teal-300/80">
+          Strength x Form
+        </p>
+        <h2 className="mt-3 text-3xl font-semibold sm:text-[2.1rem]">Scroll the posing reel</h2>
+        <p className="mx-auto mt-3 max-w-xl text-sm text-slate-400">
+          Glide through the routine to explore your potential for power and aesthetics.
+        </p>
+      </div>
+
+      <div
+        ref={pinContainerRef}
+        className="relative mx-auto mt-10 flex max-w-4xl flex-col items-center px-3 sm:mt-12 sm:px-4"
+      >
+        <div className="relative aspect-[9/16] w-full max-w-[520px] overflow-hidden rounded-[2.4rem] border border-white/10 bg-black shadow-[0_36px_120px_-50px_rgba(34,211,238,0.45)]">
+          <video
+            ref={videoRef}
+            src="/physique/website-video-1.mp4"
+            playsInline
+            muted
+            preload="metadata"
+            controls={prefersReducedMotion ?? false}
+            className="h-full w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/0 via-slate-950/8 to-slate-950/28" />
+          {callouts.map((callout, idx) => (
+            <div
+              key={callout.title}
+              ref={(el) => {
+                calloutRefs.current[idx] = el;
+              }}
+              className={`pointer-events-none absolute w-[180px] rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-left backdrop-blur-md shadow-[0_24px_60px_-32px_rgba(56,189,248,0.55)] ${callout.position} ${
+                prefersReducedMotion ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <p className="text-[0.6rem] uppercase tracking-[0.28em] text-teal-200/80">{callout.title}</p>
+              <p className="mt-1.5 text-2xl font-semibold text-white">{callout.value}</p>
+              <p className="mt-1 text-xs text-slate-300">{callout.subtitle}</p>
+            </div>
+          ))}
+        </div>
+        {!prefersReducedMotion && (
+          <p className="mt-5 flex items-center gap-2 text-[0.65rem] uppercase tracking-[0.3em] text-slate-400/80">
+            <span className="h-px w-6 bg-slate-600/60" />
+            Scroll to scrub
+            <span className="h-px w-6 bg-slate-600/60" />
+          </p>
+        )}
+        {prefersReducedMotion && (
+          <p className="mt-5 text-xs text-slate-400">
+            Motion reduced — use the transport controls to explore the reel.
+          </p>
+        )}
+      </div>
+    </section>
+  );
+};
