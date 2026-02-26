@@ -738,7 +738,7 @@ export default function AestheticaFitnessCoaching() {
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
           {[
             { name: "Amir", quote: "Added 170 lb to bench while body recomping, lost 10 lb of fat while gaining + 25 lb of muscle", stat: "-10 lb, +170 lb bench" },
-            { name: "Jasmine", quote: "Finally built glutes without killing my knees.", stat: "+2" },
+            { name: "Jasmine", quote: "Finally built glutes without killing my knees.", stat: "+ 110 lb Hip Thrust" },
             { name: "Duncan", quote: "Busy schedule, lost 10 lb while getting abs and getting stronger across all lifts", stat: "-10 lb" },
           ].map((t, i) => (
             <Card
