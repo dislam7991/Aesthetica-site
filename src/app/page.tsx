@@ -417,6 +417,7 @@ const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checko
 export default function AestheticaFitnessCoaching() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", goals: "", time: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   const prefersReducedMotion = useReducedMotion();
@@ -441,9 +442,15 @@ export default function AestheticaFitnessCoaching() {
     }
     setSubmitting(true);
     try {
-      console.log("Consultation request:", form);
-      alert("Consultation request sent! I’ll email you within 24 hours.");
+      await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ "form-name": "consultation", ...form }).toString(),
+      });
+      setSubmitted(true);
       setForm({ name: "", email: "", phone: "", goals: "", time: "" });
+    } catch {
+      alert("Something went wrong. Please try again or use Calendly.");
     } finally {
       setSubmitting(false);
     }
@@ -732,7 +739,7 @@ export default function AestheticaFitnessCoaching() {
           {[
             { name: "Amir", quote: "Added 170 lb to bench while body recomping, lost 10 lb of fat while gaining + 25 lb of muscle", stat: "-10 lb, +170 lb bench" },
             { name: "Jasmine", quote: "Finally built glutes without killing my knees.", stat: "+2" },
-            { name: "Duncan", quote: "Busy schedule, lost 10 lb while getting abs and keeping strength", stat: "-10 lb" },
+            { name: "Duncan", quote: "Busy schedule, lost 10 lb while getting abs and getting stronger across all lifts", stat: "-10 lb" },
           ].map((t, i) => (
             <Card
               key={i}
@@ -813,75 +820,104 @@ export default function AestheticaFitnessCoaching() {
             15–20 minute call to map your goals and pick the right path. No pressure, just clarity.
           </p>
 
-          <form onSubmit={submitForm} className="mt-6 grid grid-cols-1 gap-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm">Name</label>
-                <Input
-                  placeholder="Your full name"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
+          {submitted ? (
+            <div className="mt-6 flex flex-col items-center gap-4 py-10 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-600/20 text-blue-400">
+                <Mail className="h-8 w-8" />
               </div>
-              <div>
-                <label className="mb-1 block text-sm">Email</label>
-                <Input
-                  type="email"
-                  placeholder="you@email.com"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm">Phone (optional)</label>
-                <Input
-                  placeholder="(xxx) xxx-xxxx"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-sm">Preferred time (optional)</label>
-                <Input
-                  placeholder="e.g., Weeknights after 6pm"
-                  value={form.time}
-                  onChange={(e) => setForm({ ...form, time: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm">Your goals</label>
-              <textarea
-                rows={5}
-                placeholder="Tell me what you want to achieve and any constraints (injuries, schedule)."
-                className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 text-white placeholder-zinc-400 outline-none transition focus:border-white/40"
-                value={form.goals}
-                onChange={(e) => setForm({ ...form, goals: e.target.value })}
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 pt-2 text-sm text-slate-400">
-              <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> Reply via email</div>
-              <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> Quick call</div>
-              <div className="flex items-center gap-2"><Calendar className="h-4 w-4" /> 15–20 minutes</div>
-            </div>
-
-            <div className="pt-2">
-              <Button magnetic disabled={submitting} size="lg" className="w-full bg-blue-600">
-                {submitting ? "Sending…" : "Request Consultation"}
-              </Button>
-            </div>
-
-            <div className="pt-3">
-              <AnchorButton magnetic href={CALENDLY} target="_blank" rel="noreferrer" variant="outline" className="w-full">
-                Or schedule instantly on Calendly
+              <h3 className="text-xl font-semibold">Request Received</h3>
+              <p className="text-slate-300">I&apos;ll follow up within 24 hours. Check your inbox!</p>
+              <AnchorButton magnetic href={CALENDLY} target="_blank" rel="noreferrer" variant="outline">
+                Or book on Calendly now
               </AnchorButton>
+              <button className="text-sm text-slate-400 hover:text-white" onClick={() => setSubmitted(false)}>
+                Send another request
+              </button>
             </div>
-          </form>
+          ) : (
+            <form
+              name="consultation"
+              method="POST"
+              data-netlify="true"
+              onSubmit={submitForm}
+              className="mt-6 grid grid-cols-1 gap-4"
+            >
+              <input type="hidden" name="form-name" value="consultation" />
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm">Name</label>
+                  <Input
+                    name="name"
+                    placeholder="Your full name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm">Email</label>
+                  <Input
+                    name="email"
+                    type="email"
+                    placeholder="you@email.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm">Phone (optional)</label>
+                  <Input
+                    name="phone"
+                    placeholder="(xxx) xxx-xxxx"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm">Preferred time (optional)</label>
+                  <Input
+                    name="time"
+                    placeholder="e.g., Weeknights after 6pm"
+                    value={form.time}
+                    onChange={(e) => setForm({ ...form, time: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm">Your goals</label>
+                <textarea
+                  name="goals"
+                  rows={5}
+                  placeholder="Tell me what you want to achieve and any constraints (injuries, schedule)."
+                  className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 text-white placeholder-zinc-400 outline-none transition focus:border-white/40"
+                  value={form.goals}
+                  onChange={(e) => setForm({ ...form, goals: e.target.value })}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 pt-2 text-sm text-slate-400">
+                <div className="flex items-center gap-2"><Mail className="h-4 w-4" /> Reply via email</div>
+                <div className="flex items-center gap-2"><Phone className="h-4 w-4" /> Quick call</div>
+                <div className="flex items-center gap-2"><Calendar className="h-4 w-4" /> 15–20 minutes</div>
+              </div>
+
+              <div className="pt-2">
+                <Button magnetic disabled={submitting} size="lg" className="w-full bg-blue-600">
+                  {submitting ? "Sending…" : "Request Consultation"}
+                </Button>
+              </div>
+
+              <div className="pt-3">
+                <AnchorButton magnetic href={CALENDLY} target="_blank" rel="noreferrer" variant="outline" className="w-full">
+                  Or schedule instantly on Calendly
+                </AnchorButton>
+              </div>
+            </form>
+          )}
         </div>
       </section>
 
