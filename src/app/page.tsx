@@ -1265,14 +1265,14 @@ const ScrollScrubPhysique = () => {
       context = setupTimeline();
     };
 
-    if (video.readyState >= 1) {
+    if (video.readyState >= 4) {
       handleLoaded();
     } else {
-      video.addEventListener("loadedmetadata", handleLoaded);
+      video.addEventListener("canplaythrough", handleLoaded, { once: true });
     }
 
     return () => {
-      video.removeEventListener("loadedmetadata", handleLoaded);
+      video.removeEventListener("canplaythrough", handleLoaded);
       context?.revert();
     };
   }, [prefersReducedMotion]);
@@ -1309,7 +1309,7 @@ const ScrollScrubPhysique = () => {
             src="/physique/website-video-1.mp4"
             playsInline
             muted
-            preload="metadata"
+            preload="auto"
             controls={prefersReducedMotion ?? false}
             className="h-full w-full object-cover"
           />
