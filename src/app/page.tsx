@@ -469,7 +469,7 @@ export default function AestheticaFitnessCoaching() {
             shadow-[0_0_10px_2px_rgba(34,211,238,0.35)]
             transition-[width] duration-200 ease-out motion-reduce:transition-none
           "
-          style={{ width: `${Math.round(scrollProgress * 100)}%` }}
+          style={{ width: `${scrollProgress}%` }}
         />
       </div>
 
