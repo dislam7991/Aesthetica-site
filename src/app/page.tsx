@@ -1306,7 +1306,7 @@ const ScrollScrubPhysique = () => {
         <div className="relative aspect-[9/16] w-full max-w-[520px] overflow-hidden rounded-[2.4rem] border border-white/10 bg-black shadow-[0_36px_120px_-50px_rgba(34,211,238,0.45)]">
           <video
             ref={videoRef}
-            src="/physique/website-video-1.mp4"
+            src="/physique/website-video-scrub.mp4"
             playsInline
             muted
             preload="auto"
