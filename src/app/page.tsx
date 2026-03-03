@@ -370,10 +370,10 @@ const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checko
       whileHover={prefersReducedMotion ? undefined : { y: -12, scale: 1.01 }}
       whileTap={prefersReducedMotion ? undefined : { y: -4 }}
     >
-      <Card className="relative overflow-visible bg-gradient-to-b from-slate-900 to-slate-950 text-white shadow-xl hover:border-white/20 hover:shadow-[0_28px_52px_-28px_rgba(56,189,248,0.55)]">
+      <Card className="relative overflow-visible bg-linear-to-b from-slate-900 to-slate-950 text-white shadow-xl hover:border-white/20 hover:shadow-[0_28px_52px_-28px_rgba(56,189,248,0.55)]">
         <div className="pointer-events-none absolute inset-0 opacity-40 [background:radial-gradient(1200px_500px_at_80%_-20%,rgba(59,130,246,.3),transparent_60%)]" />
         {badge && (
-          <span className="pointer-events-none absolute left-1/2 top-0 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-gradient-to-r from-sky-400/25 via-cyan-300/25 to-teal-300/25 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-teal-100 shadow-[0_18px_45px_-18px_rgba(34,211,238,0.6)] backdrop-blur-md">
+          <span className="pointer-events-none absolute left-1/2 top-0 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-linear-to-r from-sky-400/25 via-cyan-300/25 to-teal-300/25 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-teal-100 shadow-[0_18px_45px_-18px_rgba(34,211,238,0.6)] backdrop-blur-md">
             <Sparkles className="h-4 w-4 text-teal-100" />
             {badge}
           </span>
@@ -459,13 +459,13 @@ export default function AestheticaFitnessCoaching() {
   return (
     <main className="min-h-screen scroll-smooth bg-slate-950 text-slate-100">
       {/* Scroll progress bar */}
-      <div aria-hidden className="pointer-events-none fixed left-0 top-0 z-[70] h-[3px] w-full">
+      <div aria-hidden className="pointer-events-none fixed left-0 top-0 z-70 h-[3px] w-full">
         {/* optional subtle track: bg-white/5 */}
         <div className="h-full w-full bg-white/5"></div>
         <div
           className="
             absolute left-0 top-0 h-full rounded-r-full
-            bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300
+            bg-linear-to-r from-blue-400 via-cyan-300 to-teal-300
             shadow-[0_0_10px_2px_rgba(34,211,238,0.35)]
             transition-[width] duration-200 ease-out motion-reduce:transition-none
           "
@@ -477,7 +477,7 @@ export default function AestheticaFitnessCoaching() {
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(800px_400px_at_20%_-10%,rgba(59,130,246,.35),transparent),radial-gradient(600px_300px_at_80%_-10%,rgba(16,185,129,.25),transparent)]" />
 
       {/* HEADER */}
-<header className="sticky top-0 z-50 border-b border-white/5 backdrop-blur supports-[backdrop-filter]:bg-slate-950/70">
+<header className="sticky top-0 z-50 border-b border-white/5 backdrop-blur supports-backdrop-filter:bg-slate-950/70">
   <div className="mx-auto flex max-w-6xl items-center justify-between px-3 py-2 sm:px-4 sm:py-3">
     <div className="flex items-center gap-2 sm:gap-3">
       <Image
@@ -528,7 +528,7 @@ export default function AestheticaFitnessCoaching() {
 
         <h1 className="text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight md:text-6xl">
           Sculpt a powerful,{" "}
-          <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-blue-400 via-cyan-300 to-teal-300 bg-clip-text text-transparent">
             timeless physique
           </span>
         </h1>
@@ -565,7 +565,7 @@ export default function AestheticaFitnessCoaching() {
         variants={prefersReducedMotion ? undefined : heroImageVariant}
         transition={{ duration: 0.8, ease: MOTION_EASE }}
       >
-        <div className="absolute -inset-4 -z-10 rounded-3xl bg-gradient-to-br from-blue-500/10 to-teal-500/10 blur-2xl" />
+        <div className="absolute -inset-4 -z-10 rounded-3xl bg-linear-to-br from-blue-500/10 to-teal-500/10 blur-2xl" />
         <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-4 sm:p-6 shadow-2xl">
           <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <Stat label="Years Training" value="10+" />
@@ -774,7 +774,7 @@ export default function AestheticaFitnessCoaching() {
             <figure
               key={img.src}
               className="
-                group relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/10
+                group relative aspect-4/5 overflow-hidden rounded-2xl border border-white/10
                 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
                 will-change-transform hover:-translate-y-1
                 motion-reduce:transition-none motion-reduce:transform-none
@@ -787,7 +787,7 @@ export default function AestheticaFitnessCoaching() {
                 className="object-cover transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 360px"
               />
-              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent p-2 text-xs text-white/80">
+              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/40 via-black/10 to-transparent p-2 text-xs text-white/80">
                 {img.alt}
               </figcaption>
             </figure>
@@ -935,7 +935,7 @@ export default function AestheticaFitnessCoaching() {
 
       <div className="fixed inset-x-0 top-0 z-50 h-1 bg-cyan-900/20">
         <div
-          className="h-full bg-gradient-to-r from-sky-400 via-teal-400 to-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.55)] transition-[width] duration-150 ease-out"
+          className="h-full bg-linear-to-r from-sky-400 via-teal-400 to-cyan-500 shadow-[0_0_12px_rgba(34,211,238,0.55)] transition-[width] duration-150 ease-out"
           style={{ width: `${scrollProgress}%` }}
         />
       </div>
@@ -978,7 +978,7 @@ function SellingPoint({
       whileTap={prefersReducedMotion ? undefined : { y: -4 }}
     >
       <div className="mb-3 flex items-center gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-blue-500/20 to-teal-400/20">
+        <span className="grid h-10 w-10 place-items-center rounded-2xl bg-linear-to-br from-blue-500/20 to-teal-400/20">
           <Icon className="h-5 w-5 text-teal-200" />
         </span>
         <h3 className="text-lg font-semibold">{title}</h3>
@@ -1030,7 +1030,7 @@ const PhysiqueCalloutShowcase = () => {
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: pinned,                          // 🔥 trigger on the image container itself
-          start: "top top",                         // pin when the *image* hits the top of the viewport
+          start: "20% top",                         // pin when the head area (~20% down) hits the top of the viewport
           end: () => `+=${window.innerHeight * 2.4}`,
           scrub: true,
           pin: pinned,
@@ -1085,19 +1085,22 @@ const PhysiqueCalloutShowcase = () => {
 
       <div
         ref={pinnedRef}
-        className="relative mx-auto mt-6 sm:mt-8 w-full overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-[0_40px_160px_-70px_rgba(34,211,238,0.45)]"
+        className="relative mx-auto mt-6 sm:mt-8 w-full rounded-3xl shadow-[0_40px_160px_-70px_rgba(34,211,238,0.45)]"
       >
-        <Image
-          src="/physique/hero-wide.jpg"
-          alt="Full physique spotlight"
-          width={1600}
-          height={900}
-          priority
-          className="h-auto w-full object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
-        />
-        {/* same gradient feel as original featured image */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
+        {/* overflow-hidden is on this inner wrapper only, so callout labels can extend outside the image bounds */}
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950">
+          <Image
+            src="/physique/hero-wide.jpg"
+            alt="Full physique spotlight"
+            width={1600}
+            height={900}
+            priority
+            className="h-auto w-full object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1200px"
+          />
+          {/* same gradient feel as original featured image */}
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950/60 to-transparent" />
+        </div>
 
           {PHYSIQUE_CALLOUTS.map((callout, index) => {
             // Build arrow geometry:
@@ -1303,7 +1306,7 @@ const ScrollScrubPhysique = () => {
         ref={pinContainerRef}
         className="relative mx-auto mt-10 flex max-w-4xl flex-col items-center px-3 sm:mt-12 sm:px-4"
       >
-        <div className="relative aspect-[9/16] w-full max-w-[520px] overflow-hidden rounded-[2.4rem] border border-white/10 bg-black shadow-[0_36px_120px_-50px_rgba(34,211,238,0.45)]">
+        <div className="relative aspect-9/16 w-full max-w-[520px] overflow-hidden rounded-[2.4rem] border border-white/10 bg-black shadow-[0_36px_120px_-50px_rgba(34,211,238,0.45)]">
           <video
             ref={videoRef}
             src="/physique/website-video-scrub.mp4"
@@ -1313,7 +1316,7 @@ const ScrollScrubPhysique = () => {
             controls={prefersReducedMotion ?? false}
             className="h-full w-full object-cover"
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/0 via-slate-950/8 to-slate-950/28" />
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-slate-950/0 via-slate-950/8 to-slate-950/28" />
           {callouts.map((callout, idx) => (
             <div
               key={callout.title}
