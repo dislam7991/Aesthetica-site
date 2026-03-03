@@ -1054,7 +1054,7 @@ const PhysiqueCalloutShowcase = () => {
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: pinned,                          // 🔥 trigger on the image container itself
-          start: "20% top",                         // pin when the head area (~20% down) hits the top of the viewport
+          start: "15% top",                         // pin when the head area (~20% down) hits the top of the viewport
           end: () => `+=${window.innerHeight * 2.4}`,
           scrub: true,
           pin: pinned,
