@@ -9,11 +9,12 @@ import {
   Shield,
   Timer,
   CheckCircle2,
-  ArrowRight, 
+  ArrowRight,
   Mail,
   Phone,
   Calendar,
   ChevronDown,
+  Moon,
 } from "lucide-react";
 import { motion, useReducedMotion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import gsap from "gsap";
@@ -353,7 +354,7 @@ type ProgramCardProps = {
   price: number;
   bullets: string[];
   label: string;
-  checkoutUrl: string;
+  checkoutUrl?: string;
   badge?: string;
 };
 const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checkoutUrl, badge }: ProgramCardProps) => {
@@ -392,8 +393,11 @@ const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checko
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="text-3xl font-semibold">
-            ${price}
-            <span className="ml-1 text-base font-normal text-slate-300"> one-time</span>
+            {price === 0 ? (
+              <span className="text-teal-300">Free</span>
+            ) : (
+              <>${price}<span className="ml-1 text-base font-normal text-slate-300"> one-time</span></>
+            )}
           </div>
           <div className="space-y-2">
             {bullets.map((b, i) => (
@@ -402,9 +406,15 @@ const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checko
           </div>
         </CardContent>
         <CardFooter>
-          <AnchorButton magnetic href={checkoutUrl} target="_blank" rel="noreferrer" size="lg" className="w-full">
-            Get Program <ArrowRight className="ml-2 h-4 w-4" />
-          </AnchorButton>
+          {checkoutUrl ? (
+            <AnchorButton magnetic href={checkoutUrl} target="_blank" rel="noreferrer" size="lg" className="w-full">
+              Get Program <ArrowRight className="ml-2 h-4 w-4" />
+            </AnchorButton>
+          ) : (
+            <AnchorButton magnetic href="#consult" size="lg" className="w-full">
+              Get Free Program <ArrowRight className="ml-2 h-4 w-4" />
+            </AnchorButton>
+          )}
         </CardFooter>
       </Card>
     </motion.div>
@@ -616,7 +626,7 @@ export default function AestheticaFitnessCoaching() {
           </a>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
           <ProgramCard
             icon={Dumbbell}
             title="Aesthetica: Foundations"
@@ -660,10 +670,24 @@ export default function AestheticaFitnessCoaching() {
               "Restaurant & travel survival playbook",
             ]}
           />
+          <ProgramCard
+            icon={Moon}
+            title="Ramadan Training Arc"
+            tagline="3-phase 30-day plan — strength, healing, and spirituality aligned."
+            price={0}
+            label="All Levels · Ramadan"
+            badge="Free"
+            bullets={[
+              "3 phases: adapt, maintain, peak — built around Ramadan's rhythm",
+              "Workouts timed around suhoor, iftar & taraweeh",
+              "Fasted-state muscle & strength retention strategies",
+              "Islamic reminders, diet tips & spiritual alignment cues",
+            ]}
+          />
         </div>
 
         <div className="mt-6 text-center text-sm text-slate-400">
-          Secure checkout via Stripe
+          Secure checkout via Stripe · Free programs delivered via consult
         </div>
       </section>
 
