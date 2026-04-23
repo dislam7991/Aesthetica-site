@@ -19,7 +19,7 @@ A production-ready fitness coaching web application with Stripe payment integrat
 
 ## 🌐 Live Demo
 
-> **[Live Demo](https://your-deployment-url.com)** — Replace this with your Vercel or Netlify deployment URL.
+> **[Live Demo](https://aestheticafitness.netlify.app/)** 
 
 ---
 
