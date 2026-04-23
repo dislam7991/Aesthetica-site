@@ -17,9 +17,14 @@ A production-ready fitness coaching web application with Stripe payment integrat
 
 ---
 
-## 🌐 Live Demo
+## 🌐 Live Deployments
 
-> **[Live Demo](https://aestheticafitness.netlify.app/)** 
+| Platform | URL | Notes |
+|---|---|---|
+| ▲ Vercel | [aesthetica-site.vercel.app](https://aesthetica-site.vercel.app) | Primary — recommended for Next.js |
+| ◆ Netlify | [aestheticafitness.netlify.app](https://aestheticafitness.netlify.app) | Secondary — includes Netlify Forms integration |
+
+> Both deployments serve the same codebase from this repository. See [Deployment & Engineering Notes](#-deployment--engineering-notes) for what I learned running both in parallel.
 
 ---
 
@@ -144,11 +149,15 @@ Aesthetica-site/
 
 ---
 
-## 🚢 Deployment
+## 🚢 Deployment & Engineering Notes
 
-### Netlify (configured)
+This project is intentionally deployed to **both Vercel and Netlify** from the same repository — not by accident, but as a hands-on comparison of how two major hosting platforms handle the same Next.js static export.
 
-A `netlify.toml` is already included. Push to GitHub and connect the repo in the [Netlify dashboard](https://app.netlify.com/):
+### ▲ Vercel (Primary)
+Vercel is built by the Next.js team and offers zero-config deployment. Simply connect the repo in the [Vercel dashboard](https://vercel.com/) — framework detection, build commands, and routing are handled automatically.
+
+### ◆ Netlify (Secondary)
+A `netlify.toml` is included for Netlify support. The consultation form uses **Netlify Forms** (`data-netlify="true"`) for serverless form handling with zero backend.
 
 ```toml
 [build]
@@ -156,16 +165,20 @@ A `netlify.toml` is already included. Push to GitHub and connect the repo in the
   publish = "out"
 ```
 
-### Vercel (recommended for Next.js)
+Connect the repo in the [Netlify dashboard](https://app.netlify.com/) and Netlify will pick up the config automatically.
 
-```bash
-npm i -g vercel
-vercel
-```
+### 🐛 Cross-Platform Bug I Found & Fixed
 
-Vercel auto-detects Next.js — no additional configuration needed.
+After deploying to both platforms, I noticed two images loaded on Netlify but broke on Vercel:
 
-> After deploying, update the `url` field in `src/app/layout.tsx` under `openGraph` with your production domain.
+- `PhysiqueCalloutShowcase` — hero-wide image (scroll trigger / anatomy section)
+- `Gallery` — pose-2 image
+
+**Root cause:** The image files were saved with uppercase `.JPG` extensions (`hero-wide.JPG`, `pose-2.JPG`), but the code referenced them as lowercase `.jpg`. Netlify's build environment is case-insensitive, so it resolved both. **Vercel runs on Linux (case-sensitive filesystem)**, so the paths returned a 404.
+
+**Fix:** Renamed both files to lowercase `.jpg` extensions — consistent, cross-platform, and correct.
+
+**Takeaway:** Always use lowercase file extensions for web assets. Case sensitivity differences between macOS (development), Netlify (lenient), and Linux/Vercel (strict) are a real source of silent bugs that only surface in production.
 
 ---
 
