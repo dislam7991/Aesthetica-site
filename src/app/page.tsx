@@ -24,9 +24,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
  * COMMERCE / SCHEDULING CONFIG
  *************************************************/
 const STRIPE = {
-  FOUNDATIONS: "https://buy.stripe.com/7sY8wP2vz8Gv8tggAldby08",
-  ELITE: "https://buy.stripe.com/8x23cvfil8Gv10O97Tdby09",
-  POWERCUT: "https://buy.stripe.com/6oUdR98TX4qfbFs1Frdby0a",
+  FOUNDATIONS: "https://buy.stripe.com/9B63cvdad9KzcJwgAldby0d",
+  ELITE: "https://buy.stripe.com/7sYbJ10nr5uj7pcfwhdby0c",
+  POWERCUT: "https://buy.stripe.com/aFafZh7PTcWL38W2Jvdby0b",
+  BUNDLE: "https://buy.stripe.com/6oUbJ1c696yn38WabXdby0e",
 };
 // Example: https://calendly.com/<handle>/consultation-15
 const CALENDLY = "https://calendly.com/danielislam/1-1-coaching-pow-wow";
@@ -307,8 +308,8 @@ const Feature = ({ children }: { children: React.ReactNode }) => (
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <div className={`${TRANSITION_CLASS} rounded-2xl border border-white/10 bg-slate-900/60 ${className}`}>{children}</div>;
 }
-function CardHeader({ children }: { children: React.ReactNode }) {
-  return <div className="p-5">{children}</div>;
+function CardHeader({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`p-5 ${className}`}>{children}</div>;
 }
 function CardTitle({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <h3 className={`text-lg font-semibold ${className}`}>{children}</h3>;
@@ -352,12 +353,13 @@ type ProgramCardProps = {
   title: string;
   tagline: string;
   price: number;
+  originalPrice?: number;
   bullets: string[];
   label: string;
   checkoutUrl?: string;
   badge?: string;
 };
-const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checkoutUrl, badge }: ProgramCardProps) => {
+const ProgramCard = ({ icon: Icon, title, tagline, price, originalPrice, bullets, label, checkoutUrl, badge }: ProgramCardProps) => {
   const prefersReducedMotion = useReducedMotion();
 
   return (
@@ -396,7 +398,15 @@ const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checko
             {price === 0 ? (
               <span className="text-teal-300">Free</span>
             ) : (
-              <>${price}<span className="ml-1 text-base font-normal text-slate-300"> one-time</span></>
+              <div className="flex flex-col gap-0.5">
+                {originalPrice && (
+                  <span className="text-sm font-normal text-slate-500 line-through">${originalPrice}</span>
+                )}
+                <div className="flex items-baseline gap-2">
+                  <span>${price}</span>
+                  <span className="text-base font-normal text-slate-300">one-time</span>
+                </div>
+              </div>
             )}
           </div>
           <div className="space-y-2">
@@ -413,6 +423,95 @@ const ProgramCard = ({ icon: Icon, title, tagline, price, bullets, label, checko
           ) : (
             <AnchorButton magnetic href="#consult" size="lg" className="w-full">
               Get Free Program <ArrowRight className="ml-2 h-4 w-4" />
+            </AnchorButton>
+          )}
+        </CardFooter>
+      </Card>
+    </motion.div>
+  );
+};
+
+const BundleCard = () => {
+  const prefersReducedMotion = useReducedMotion();
+  return (
+    <motion.div
+      className="mt-6"
+      initial={prefersReducedMotion ? undefined : "hidden"}
+      whileInView={prefersReducedMotion ? undefined : "visible"}
+      viewport={{ once: true, amount: 0.2 }}
+      variants={prefersReducedMotion ? undefined : fadeUpVariant}
+      transition={{ duration: 0.6, ease: MOTION_EASE }}
+    >
+      <Card className="relative overflow-visible bg-linear-to-br from-slate-900 via-slate-900 to-slate-950 text-white border-white/15 shadow-[0_36px_120px_-50px_rgba(34,211,238,0.3)]">
+        <div className="pointer-events-none absolute inset-0 opacity-50 [background:radial-gradient(1400px_600px_at_60%_-10%,rgba(59,130,246,.2),transparent_60%)]" />
+        <span className="pointer-events-none absolute left-1/2 top-0 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/20 bg-linear-to-r from-sky-400/25 via-cyan-300/25 to-teal-300/25 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-teal-100 shadow-[0_18px_45px_-18px_rgba(34,211,238,0.6)] backdrop-blur-md">
+          <Sparkles className="h-4 w-4 text-teal-100" />
+          Best Value Bundle
+        </span>
+        <CardHeader className="pt-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div className="mb-2">
+                <span className="inline-flex items-center rounded-full bg-blue-500/10 px-3 py-1 text-xs text-blue-200">
+                  Beginner → Advanced
+                </span>
+              </div>
+              <CardTitle className="flex flex-wrap items-center gap-2 text-2xl">
+                <Dumbbell className="h-6 w-6" />
+                <span>Foundations</span>
+                <span className="text-slate-500">+</span>
+                <Sparkles className="h-6 w-6" />
+                <span>Elite Bundle</span>
+              </CardTitle>
+              <p className="mt-1 text-sm text-slate-300">
+                Start strong, then level up — both programs at a single discounted price.
+              </p>
+            </div>
+            <div className="shrink-0 sm:text-right">
+              <div className="text-sm font-normal text-slate-500 line-through">$108</div>
+              <div className="text-4xl font-semibold">$44</div>
+              <div className="text-sm text-slate-300">one-time · saves $64</div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-slate-400">
+                Aesthetica: Foundations
+              </p>
+              <div className="space-y-2">
+                {[
+                  "Push/Pull/Lower/Upper structure with smart volume",
+                  "Technique cues + movement substitutions",
+                  "Progress trackers + deload guidance",
+                  "Grocery list & high-protein meal builder",
+                ].map((b, i) => <Feature key={i}>{b}</Feature>)}
+              </div>
+            </div>
+            <div>
+              <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-slate-400">
+                Aesthetica: Elite
+              </p>
+              <div className="space-y-2">
+                {[
+                  "Periodized mesocycles (12 weeks)",
+                  "Specialization blocks for lagging parts",
+                  "Conditioning finishers that won't kill gains",
+                  "Macro targets + supplement guide",
+                ].map((b, i) => <Feature key={i}>{b}</Feature>)}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          {STRIPE.BUNDLE ? (
+            <AnchorButton magnetic href={STRIPE.BUNDLE} target="_blank" rel="noreferrer" size="lg" className="w-full sm:mx-auto sm:w-auto">
+              Get the Bundle <ArrowRight className="ml-2 h-4 w-4" />
+            </AnchorButton>
+          ) : (
+            <AnchorButton magnetic href="#consult" size="lg" className="w-full sm:mx-auto sm:w-auto">
+              Get the Bundle <ArrowRight className="ml-2 h-4 w-4" />
             </AnchorButton>
           )}
         </CardFooter>
@@ -631,7 +730,8 @@ export default function AestheticaFitnessCoaching() {
             icon={Dumbbell}
             title="Aesthetica: Foundations"
             tagline="4-day split for busy lifters — master the basics, build quality muscle."
-            price={79}
+            price={19}
+            originalPrice={79}
             label="Beginner/Intermediate"
             checkoutUrl={STRIPE.FOUNDATIONS}
             bullets={[
@@ -645,7 +745,8 @@ export default function AestheticaFitnessCoaching() {
             icon={Sparkles}
             title="Aesthetica: Elite"
             tagline="5–6 day advanced hypertrophy cycle for maximal physique development."
-            price={99}
+            price={29}
+            originalPrice={99}
             label="Advanced"
             checkoutUrl={STRIPE.ELITE}
             badge="Most Popular"
@@ -660,7 +761,8 @@ export default function AestheticaFitnessCoaching() {
             icon={Flame}
             title="Aesthetica: Power-Cut"
             tagline="Fat-loss without losing strength — look sharper, lift strong."
-            price={89}
+            price={24}
+            originalPrice={89}
             label="Transformation"
             checkoutUrl={STRIPE.POWERCUT}
             bullets={[
@@ -685,6 +787,8 @@ export default function AestheticaFitnessCoaching() {
             ]}
           />
         </div>
+
+        <BundleCard />
 
         <div className="mt-6 text-center text-sm text-slate-400">
           Secure checkout via Stripe · Free programs delivered via consult
